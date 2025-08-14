@@ -3,10 +3,10 @@ import { io, Socket } from 'socket.io-client';
 import { Subject, Observable } from 'rxjs';
 
 export interface JoinedPayload { roomId: string; nickname: string; role?: 'dm' | 'player'; }
-export interface ChatPayload   { from: string; text: string; ts: number; }
-export interface DmPayload     { from: 'DM'; text: string; ts: number; }
-export interface RollPayload   { from: string; notation: string; detail: string; rolls: number[]; total: number; ts: number; }
-export interface RoomPlayer    { id: string; name: string; role?: 'dm' | 'player'; }
+export interface ChatPayload { from: string; text: string; ts: number; }
+export interface DmPayload { from: 'DM'; text: string; ts: number; }
+export interface RollPayload { from: string; notation: string; detail: string; rolls: number[]; total: number; ts: number; }
+export interface RoomPlayer { id: string; name: string; role?: 'dm' | 'player'; }
 
 export interface CombatUpdate {
   roomId: string;
@@ -27,16 +27,16 @@ export class SocketService {
   private connected = false;
   private readonly url = 'http://localhost:3000';
 
-  joined$   = new Subject<JoinedPayload>();
-  system$   = new Subject<string>();
-  chat$     = new Subject<ChatPayload>();
-  dm$       = new Subject<DmPayload>();
-  roll$     = new Subject<RollPayload>();
-  players$  = new Subject<RoomPlayer[]>();
-  combat$   = new Subject<CombatUpdate>();
+  joined$ = new Subject<JoinedPayload>();
+  system$ = new Subject<string>();
+  chat$ = new Subject<ChatPayload>();
+  dm$ = new Subject<DmPayload>();
+  roll$ = new Subject<RollPayload>();
+  players$ = new Subject<RoomPlayer[]>();
+  combat$ = new Subject<CombatUpdate>();
 
-  ready$      = new Subject<void>();
-  connected$  = new Subject<boolean>();
+  ready$ = new Subject<void>();
+  connected$ = new Subject<boolean>();
   connectErr$ = new Subject<any>();
 
   connect(): void {
@@ -56,12 +56,12 @@ export class SocketService {
     this.socket.io.on('error', (err: any) => this.connectErr$.next(err));
     this.socket.on('connect_error', (err: any) => this.connectErr$.next(err));
 
-    this.socket.on('joined',    (d: JoinedPayload)  => this.joined$.next(d));
-    this.socket.on('system',    (t: string)         => this.system$.next(t));
-    this.socket.on('chat',      (m: ChatPayload)    => this.chat$.next(m));
-    this.socket.on('dm',        (m: DmPayload)      => this.dm$.next(m));
-    this.socket.on('roll',      (m: RollPayload)    => this.roll$.next(m));
-    this.socket.on('presence',  (arr: RoomPlayer[]) => this.players$.next(arr));
+    this.socket.on('joined', (d: JoinedPayload) => this.joined$.next(d));
+    this.socket.on('system', (t: string) => this.system$.next(t));
+    this.socket.on('chat', (m: ChatPayload) => this.chat$.next(m));
+    this.socket.on('dm', (m: DmPayload) => this.dm$.next(m));
+    this.socket.on('roll', (m: RollPayload) => this.roll$.next(m));
+    this.socket.on('presence', (arr: RoomPlayer[]) => this.players$.next(arr));
     this.socket.on('combat:update', (st: CombatUpdate) => this.combat$.next(st));
   }
 
@@ -69,21 +69,21 @@ export class SocketService {
     this.socket?.emit('join', { roomId, name, role });
   }
   sendMessage(text: string, dm = false) { this.socket?.emit('chat', { text, dm }); }
-  rollDice(notation: string)            { this.socket?.emit('roll', { notation }); }
-  requestPresence()                      { this.socket?.emit('getPresence'); }
-  announce(text: string)                 { this.socket?.emit('announce', { text }); }
+  rollDice(notation: string) { this.socket?.emit('roll', { notation }); }
+  requestPresence() { this.socket?.emit('getPresence'); }
+  announce(text: string) { this.socket?.emit('announce', { text }); }
 
   // Combate (idéntico a antes)
-  combatGet()                                      { this.socket?.emit('combat:get'); }
+  combatGet() { this.socket?.emit('combat:get'); }
   combatStart(opts: { durationSec?: number; autoAdvance?: boolean; autoDelaySec?: number }) { this.socket?.emit('combat:start', opts); }
-  combatReroll()                                   { this.socket?.emit('combat:reroll'); }
-  combatNext()                                     { this.socket?.emit('combat:next'); }
-  combatPrev()                                     { this.socket?.emit('combat:prev'); }
-  combatEnd()                                      { this.socket?.emit('combat:end'); }
-  combatSyncPlayers()                              { this.socket?.emit('combat:syncPlayers'); }
+  combatReroll() { this.socket?.emit('combat:reroll'); }
+  combatNext() { this.socket?.emit('combat:next'); }
+  combatPrev() { this.socket?.emit('combat:prev'); }
+  combatEnd() { this.socket?.emit('combat:end'); }
+  combatSyncPlayers() { this.socket?.emit('combat:syncPlayers'); }
   combatSettings(opts: { durationSec?: number; autoAdvance?: boolean; autoDelaySec?: number }) { this.socket?.emit('combat:settings', opts); }
-  combatPause()                                    { this.socket?.emit('combat:pause'); }
-  combatResume()                                   { this.socket?.emit('combat:resume'); }
+  combatPause() { this.socket?.emit('combat:pause'); }
+  combatResume() { this.socket?.emit('combat:resume'); }
 
   on<T = any>(event: string): Observable<T> {
     return new Observable<T>(observer => {
@@ -92,4 +92,10 @@ export class SocketService {
   }
 
   isConnected(): boolean { return this.connected; }
+
+  // En src/app/services/socket.service.ts
+  combatFinishTurn() {
+    this.socket?.emit('combat:finishTurn');
+  }
+
 }

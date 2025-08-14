@@ -10,11 +10,13 @@ import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzGridModule } from 'ng-zorro-antd/grid';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'app-login',
   standalone: true,
   imports: [
+    NgIf,
     ReactiveFormsModule,
     NzFormModule, NzInputModule, NzButtonModule, NzCheckboxModule,
     NzCardModule, NzTypographyModule, NzGridModule

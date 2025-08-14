@@ -55,7 +55,7 @@
     display: flex; gap: 6px; flex-wrap: wrap;
   }
   .active-card .next .chip {
-    padding: 2px 8px; border-radius: 999px; background: #f0f0f0;
+    padding: 2px 8px; border-radius: 999px; background: #f0f0f0 !important;
   }
   .active-card .next .chip.empty { opacity: .6; }
   
