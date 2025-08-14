@@ -1,5 +1,13 @@
 @import 'ng-zorro-antd/ng-zorro-antd.min.css';
 
+
+/* Ajustes opcionales por si tienes cabecera fija */
+:root { --shell-offset: 72px; }           /* ya lo usas en tu app */
+html.app-scale-80 { --shell-offset: 57.6px; }  /* 72 * 0.8 */
+
+
+
+
 html, body { height: 100%; margin: 0; }
 :root { color-scheme: light dark; }
 
@@ -216,3 +224,24 @@ html, body { height: 100%; margin: 0; }
     cursor: auto !important;
   }
   
+
+
+/* Escalado global -20% */
+html.app-scale-80 {
+  /* Navegadores Chromium/WebKit (Chrome, Edge, Safari) */
+  zoom: 0.8;
+}
+
+/* Fallback estándar (Firefox y otros sin 'zoom') */
+@supports not (zoom: 1) {
+  html.app-scale-80 {
+    transform: scale(0.8);
+    transform-origin: 0 0;
+  }
+  /* Compensar el “encogido” para ocupar todo el viewport */
+  html.app-scale-80,
+  html.app-scale-80 body {
+    width: 125%;
+    height: 125%;
+  }
+}
