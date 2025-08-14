@@ -1,0 +1,242 @@
+/* ============================================================
+   Layout general del chat (sidebar + área principal)
+   - Grid de 2 columnas: 300px (sidebar) + 1fr (chat)
+   - Altura mínima para ocupar la pantalla menos el header
+   ============================================================ */
+   .chat-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 16px;
+    min-height: calc(100vh - 110px);
+  }
+  
+  /* ------------------------------------------------------------
+     Sidebar (columna izquierda)
+     - Separador visual con borde
+     - Un poco de padding para respiración
+     ------------------------------------------------------------ */
+  .sidebar {
+    border-right: 1px solid #eee;
+    padding-right: 12px;
+  }
+  .side-title { margin-top: 4px; }
+  
+  /* Paneles dentro de la sidebar (dados, ayuda DM, etc.) */
+  .panel {
+    margin: 16px 0;
+    padding: 12px;
+    border: 1px solid #f0f0f0;
+    border-radius: 10px;
+    background: #fff;
+  }
+  .small { color: #8c8c8c; }
+  
+  /* ============================================================
+     Columna principal del chat
+     - Flex column para colocar: header -> log -> composer
+     ============================================================ */
+  .chat {
+    display: flex;
+    flex-direction: column;
+    min-height: 60vh;
+  }
+  
+  /* ------------------------------------------------------------
+     Cabecera del área de chat
+     - Título a la izquierda, acciones (Salir) a la derecha
+     ------------------------------------------------------------ */
+  .chat-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 2px 8px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 8px;
+  }
+  .chat-header .room { font-weight: 700; }
+  .chat-header .header-actions { margin-left: auto; }
+  
+  /* ============================================================
+     Contenedor del log de mensajes
+     - Borde suave, fondo con ligera textura/gradiente
+     - Color de texto alto contraste
+     - overflow: auto para permitir scroll
+     ============================================================ */
+  .log {
+    flex: 1;
+    overflow: auto;
+    padding: 12px;
+    border: 1px solid #e8e8e8;
+    border-radius: 10px;
+    background:
+      radial-gradient(600px 300px at 100% -20%, rgba(149, 114, 252, 0.06), transparent 60%),
+      radial-gradient(600px 300px at -20% 100%, rgba(16, 185, 129, 0.06), transparent 60%),
+      #fcfcfd;
+    color: #111827; /* Texto legible sobre fondo claro */
+  }
+  /* Todos los descendientes heredan color legible por defecto */
+  .log * { color: inherit; }
+  
+  /* ============================================================
+     Cada mensaje (fila) dentro del log
+     - Grid con 2 columnas: avatar (36px) + burbuja (resto)
+     - Variante ".mine" invierte el orden para alinear a la derecha
+     ============================================================ */
+  .row {
+    display: grid;
+    grid-template-columns: 36px 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+    align-items: start;
+  }
+  /* Mensajes propios (alineados a la derecha) */
+  .row.mine { grid-template-columns: 1fr 36px; }
+  .row.mine .avatar { order: 2; }
+  .row.mine .bubble  { order: 1; }
+  
+  /* ============================================================
+     Avatar
+     - Paleta de colores determinista por usuario (clases c1..c6)
+     ============================================================ */
+  .avatar { user-select: none; }
+  .avatar.c1 { background: #e6f4ff; color: #0958d9; }
+  .avatar.c2 { background: #fff1f0; color: #d4380d; }
+  .avatar.c3 { background: #f6ffed; color: #389e0d; }
+  .avatar.c4 { background: #f9f0ff; color: #722ed1; }
+  .avatar.c5 { background: #fffbe6; color: #d4b106; }
+  .avatar.c6 { background: #e6fffb; color: #13c2c2; }
+  
+  /* ============================================================
+     Burbujas de mensaje
+     - Fondo blanco y borde suave
+     - Variantes por tipo: mío, DM, tirada, sistema
+     ============================================================ */
+  .bubble {
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid #eee;
+    background: #ffffff;
+    box-shadow: 0 1px 0 rgba(0,0,0,0.02);
+    max-width: 100%;
+    word-wrap: break-word;
+    color: #111827; /* Color de texto dentro de la burbuja */
+  }
+  /* Propios (mine): azul muy suave */
+  .row.mine .bubble {
+    background: #eef6ff;
+    border-color: #bae0ff;
+  }
+  /* DM: verde suave para distinguir */
+  .row.dm .bubble {
+    background: #f6ffed;
+    border-color: #b7eb8f;
+  }
+  /* Tiradas: naranja suave */
+  .row.roll .bubble {
+    background: #fff7e6;
+    border-color: #ffd591;
+  }
+  /* Sistema: gris claro y borde discontinuo */
+  .row.system .bubble {
+    background: #fafafa;
+    border-style: dashed;
+    text-align: center;
+    color: #6b7280;
+  }
+  
+  /* ------------------------------------------------------------
+     Meta (nombre, badge DM, hora) encima del texto del mensaje
+     ------------------------------------------------------------ */
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+    font-size: 12px;
+    color: #6b7280; /* gris medio */
+  }
+  .meta .from { font-weight: 700; color: #111827; }
+  .meta .time { margin-left: auto; } /* Hora alineada a la derecha */
+  
+  /* ------------------------------------------------------------
+     Texto del mensaje
+     - Respetar saltos de línea
+     - Estilos para <a> y <code> (del render markdown)
+     ------------------------------------------------------------ */
+  .text { white-space: pre-wrap; line-height: 1.45; }
+  .text a { text-decoration: underline; }
+  .text code {
+    background: #f4f4f5;
+    border-radius: 4px;
+    padding: 0 4px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  }
+  /* “Mono” para mensajes de tirada o contenido que lo requiera */
+  .text.mono {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace;
+  }
+  
+  /* ============================================================
+     Indicador “DM escribiendo…”
+     - Tres puntos animados dentro de una burbuja
+     ============================================================ */
+  .row.typing .typing-bubble {
+    display: inline-flex;
+    align-items: center;
+  }
+  .dots {
+    display: inline-flex;
+    gap: 4px;
+    padding: 6px 4px;
+  }
+  .dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #9aa3af;
+    animation: blink 1.4s infinite both;
+  }
+  .dots span:nth-child(2) { animation-delay: .2s; }
+  .dots span:nth-child(3) { animation-delay: .4s; }
+  /* Animación sencilla de aparición/desaparición */
+  @keyframes blink {
+    0%, 80%, 100% { opacity: .2; }
+    40% { opacity: 1; }
+  }
+  
+  /* ============================================================
+     Composer (zona de escritura)
+     - Input expandible + botón Enviar
+     - Separado del log por un borde superior
+     ============================================================ */
+  .composer {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid #f0f0f0;
+  }
+  .suffix-hint { color: #9aa3af; font-size: 12px; } /* Texto “Enter para enviar” */
+  
+  /* ============================================================
+     Chips (atajos rápidos)
+     - Fila de botones pequeños encima/debajo del composer
+     ============================================================ */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0;
+    margin: 8px 0 0;
+    list-style: none;
+  }
+  .chips.under { margin-top: 10px; }
+  
+  /* ============================================================
+     Responsivo
+     - En pantallas estrechas, la sidebar se apila encima del chat
+     ============================================================ */
+  @media (max-width: 920px) {
+    .chat-layout { grid-template-columns: 1fr; }
+    .sidebar { border-right: 0; padding-right: 0; }
+  }
+  

@@ -1,0 +1,23 @@
+<nz-layout class="app-shell">
+  <nz-header class="app-header">
+    <div class="container nav">
+      <a class="brand" routerLink="/">
+        <span class="logo" aria-hidden="true">🧙‍♂️</span>
+        <span class="title">Dungeons & Dragons — Mesa online</span>
+        <span class="badge">MVP</span>
+      </a>
+
+      <div class="spacer"></div>
+
+      <!-- Acciones (opcional: añade rutas si quieres) -->
+      <!-- <a class="nav-link" routerLink="/login">Login</a> -->
+      <!-- <a class="nav-link" href="https://tu-link" target="_blank" rel="noreferrer">Docs</a> -->
+    </div>
+  </nz-header>
+
+  <nz-content>
+    <div class="container">
+      <router-outlet></router-outlet>
+    </div>
+  </nz-content>
+</nz-layout>

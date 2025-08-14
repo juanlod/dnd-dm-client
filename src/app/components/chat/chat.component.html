@@ -1,0 +1,92 @@
+<div class="chat-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h3 nz-typography class="side-title">{{ headerText() }}</h3>
+
+    <section class="panel">
+      <app-dice-roller></app-dice-roller>
+    </section>
+
+    <section class="panel">
+      <h4 nz-typography>DM</h4>
+      <p class="small">Escribe <code>@dm</code> al inicio para hablar con la IA de DM.</p>
+    </section>
+  </aside>
+
+  <!-- Main chat -->
+  <section class="chat">
+    <div class="chat-header">
+      <div class="room">{{ headerText() }}</div>
+      <div class="header-actions">
+        <button
+          nz-button
+          nzDanger
+          nzSize="small"
+          nz-popconfirm
+          nzPopconfirmTitle="¿Salir de la mesa?"
+          nzPopconfirmOkText="Salir"
+          nzPopconfirmCancelText="Cancelar"
+          (nzOnConfirm)="leaveRoom()">
+          Salir de la mesa
+        </button>
+      </div>
+    </div>
+
+    <div class="log" #log>
+      <div class="row" *ngFor="let m of messages" [ngClass]="[m.type, isMine(m) ? 'mine' : '']">
+        <nz-avatar
+          class="avatar"
+          [nzText]="m.type === 'system' ? '!' : initial(m.from)"
+          [ngClass]="colorFor(m.from)">
+        </nz-avatar>
+
+        <div class="bubble">
+          <div class="meta">
+            <span class="from" *ngIf="m.type !== 'system'">{{ m.from }}</span>
+            <nz-tag *ngIf="m.type === 'dm'" nzColor="success">DM</nz-tag>
+            <span class="time">{{ time(m.ts) }}</span>
+          </div>
+
+          <div class="text" [class.mono]="m.type === 'roll'">
+            <span [innerHTML]="render(m.text)"></span>
+            <ng-container *ngIf="!m.text">—</ng-container>
+          </div>
+        </div>
+      </div>
+
+      <!-- Indicador de escritura del DM -->
+      <div class="row typing" *ngIf="dmTyping">
+        <nz-avatar class="avatar c3" nzText="DM"></nz-avatar>
+        <div class="bubble typing-bubble">
+          <div class="dots"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <form class="composer" (ngSubmit)="send()">
+      <nz-input-group [nzPrefix]="prefix" [nzSuffix]="suffix">
+        <input
+          nz-input
+          [(ngModel)]="messageText"
+          name="msg"
+          placeholder="Escribe tu acción… (usa @dm para preguntar al DM)"
+          autocomplete="off"
+          (keyup.enter)="send()"
+        />
+      </nz-input-group>
+      <ng-template #prefix>💬</ng-template>
+      <ng-template #suffix><span class="suffix-hint">Enter para enviar</span></ng-template>
+
+      <button nz-button nzType="primary" [disabled]="!messageText.trim()" htmlType="submit">
+        Enviar
+      </button>
+    </form>
+
+    <ul class="chips under">
+      <li><button nz-button nzSize="small" (click)="insert('@dm')">@dm</button></li>
+      <li><button nz-button nzSize="small" (click)="insert('- opción 1\n- opción 2')">Lista</button></li>
+      <li><button nz-button nzSize="small" (click)="insert('investigo la sala')">Investigar</button></li>
+      <li><button nz-button nzSize="small" (click)="insert('me acerco en sigilo')">Sigilo</button></li>
+    </ul>
+  </section>
+</div>

@@ -1,0 +1,68 @@
+<div class="auth-wrapper">
+  <nz-card class="auth-card" [nzBordered]="false">
+    <div class="brand">
+      <div class="logo">🧙‍♂️</div>
+      <div class="titles">
+        <h2 nz-typography class="title">Entrar a la mesa</h2>
+        <p nz-typography class="subtitle">Comparte el mismo ID de campaña con tu grupo.</p>
+      </div>
+    </div>
+
+    <!-- 👇 Forzamos layout vertical -->
+    <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="submit()" class="form">
+      <!-- Nombre -->
+      <nz-form-item>
+        <nz-form-label [nzRequired]="true" nzFor="name">Tu nombre</nz-form-label>
+        <nz-form-control [nzValidateStatus]="f.name" [nzErrorTip]="nameErrors">
+          <nz-input-group [nzPrefix]="namePrefix">
+            <input nz-input id="name" formControlName="name" placeholder="Ej: Lirien" autocomplete="off" />
+          </nz-input-group>
+          <ng-template #namePrefix>👤</ng-template>
+          <ng-template #nameErrors>
+            <ng-container *ngIf="f.name.hasError('required')">El nombre es obligatorio.</ng-container>
+            <ng-container *ngIf="f.name.hasError('minlength')">Mínimo 2 caracteres.</ng-container>
+            <ng-container *ngIf="f.name.hasError('maxlength')">Máximo 24 caracteres.</ng-container>
+            <ng-container *ngIf="f.name.hasError('pattern')">Usa letras/números/espacios/guiones.</ng-container>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Room ID -->
+      <nz-form-item>
+        <nz-form-label [nzRequired]="true" nzFor="roomId">ID de campaña</nz-form-label>
+        <nz-form-control [nzValidateStatus]="f.roomId" [nzErrorTip]="roomErrors">
+          <nz-input-group [nzPrefix]="roomPrefix" [nzSuffix]="roomSuffix">
+            <input nz-input id="roomId" formControlName="roomId" placeholder="ej: bosque-01" autocomplete="off" />
+          </nz-input-group>
+          <ng-template #roomPrefix>🏷️</ng-template>
+          <ng-template #roomSuffix>
+            <button nz-button nzSize="small" type="button" (click)="generateRoomId()">Generar</button>
+          </ng-template>
+          <ng-template #roomErrors>
+            <ng-container *ngIf="f.roomId.hasError('required')">El ID es obligatorio.</ng-container>
+            <ng-container *ngIf="f.roomId.hasError('minlength')">Mínimo 3 caracteres.</ng-container>
+            <ng-container *ngIf="f.roomId.hasError('maxlength')">Máximo 40 caracteres.</ng-container>
+            <ng-container *ngIf="f.roomId.hasError('pattern')">Solo minúsculas, números y guiones (slug).</ng-container>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+
+      <!-- Recordarme -->
+      <div class="row remember">
+        <label nz-checkbox formControlName="remember">Recordarme en este equipo</label>
+      </div>
+
+      <!-- Acciones -->
+      <div class="actions">
+        <button nz-button nzType="primary" [nzLoading]="loading" [disabled]="form.invalid || loading" htmlType="submit">
+          Entrar
+        </button>
+        <button nz-button nzType="default" type="button" (click)="form.reset({ name: '', roomId: '', remember: true })">
+          Limpiar
+        </button>
+      </div>
+
+      <div class="general-error" *ngIf="generalError">{{ generalError }}</div>
+    </form>
+  </nz-card>
+</div>
