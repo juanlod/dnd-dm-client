@@ -1,0 +1,151 @@
+.tracker2 {
+    display: grid;
+    gap: 14px;
+  }
+  
+  /* Cabecera */
+  .hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .title { margin: 0; font-weight: 700; }
+  
+  /* Tarjeta de turno activo */
+  .active-card {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+  }
+  
+  .active-card .left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .active-card .avatar {
+    width: 56px; height: 56px; font-size: 20px;
+  }
+  .active-card .info .name {
+    font-size: 20px; font-weight: 700; line-height: 1.1;
+  }
+  .active-card .info .meta {
+    display: flex; gap: 6px; margin-top: 2px;
+  }
+  
+  .active-card .timer {
+    min-width: 280px;
+  }
+  .active-card .time {
+    font-variant-numeric: tabular-nums;
+    font-size: 22px;
+    font-weight: 700;
+    text-align: right;
+    margin-bottom: 6px;
+  }
+  .active-card .next {
+    margin-top: 6px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .active-card .next .chips {
+    display: flex; gap: 6px; flex-wrap: wrap;
+  }
+  .active-card .next .chip {
+    padding: 2px 8px; border-radius: 999px; background: #f0f0f0;
+  }
+  .active-card .next .chip.empty { opacity: .6; }
+  
+  /* Soporte dark mode (separado, sin coma) */
+  :root[color-scheme='dark'] .active-card .next .chip { background: #1f1f1f; }
+  @media (prefers-color-scheme: dark) {
+    .active-card .next .chip { background: #1f1f1f; }
+  }
+  
+  /* Grid de participantes */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .unit {
+    border: 1px solid rgba(0,0,0,.06);
+  }
+  .unit.active {
+    box-shadow: 0 0 0 2px #1677ff inset;
+  }
+  
+  /* Dark para .unit (separado) */
+  :root[color-scheme='dark'] .unit { border-color: rgba(255,255,255,.08); }
+  @media (prefers-color-scheme: dark) {
+    .unit { border-color: rgba(255,255,255,.08); }
+  }
+  
+  .unit-hdr {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+  }
+  .u-avatar { width: 42px; height: 42px; }
+  .u-name { font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .u-tags { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  
+  .hp { margin-top: 8px; }
+  .hp-row {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    gap: 8px;
+    align-items: center;
+  }
+  .hp-label { font-size: 12px; color: #888; }
+  .hp-val { display: flex; align-items: center; gap: 8px; }
+  .hp-bar {
+    position: relative; height: 8px; border-radius: 6px; background: #f0f0f0; overflow: hidden; flex: 1;
+  }
+  .hp-fill {
+    position: absolute; top:0; left:0; bottom:0; width: 0;
+    background: linear-gradient(90deg, #52c41a, #389e0d);
+  }
+  .hp-text { font-variant-numeric: tabular-nums; font-size: 12px; color: #888; }
+  .nohp { font-size: 12px; padding-top: 2px; }
+  
+  /* Dark para barra de vida (separado) */
+  :root[color-scheme='dark'] .hp-bar { background: #1f1f1f; }
+  @media (prefers-color-scheme: dark) {
+    .hp-bar { background: #1f1f1f; }
+  }
+  
+  /* Condiciones */
+  .conds { margin-top: 6px; display: flex; gap: 6px; flex-wrap: wrap; }
+  
+  /* Pre-combate */
+  .pre .pre-row { display: flex; align-items: center; gap: 18px; }
+  .pre .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .muted { color: #8c8c8c; }
+  
+  /* Minilog */
+  .log .thin { margin: 0; }
+  .log-items { margin-top: 6px; display: grid; gap: 6px; }
+  .log-i {
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 8px;
+    align-items: flex-start;
+    font-size: 13px;
+  }
+  .log-i .k::before {
+    content: '•';
+    display: inline-block;
+    width: 12px;
+    text-align: center;
+    color: #8c8c8c;
+  }
+  .log-i .k[data-k="dm"]::before { content: '🧙'; }
+  .log-i .k[data-k="system"]::before { content: '⚙️'; }
+  .log-i .k[data-k="roll"]::before { content: '🎲'; }
+  .log-i.empty { color: #8c8c8c; }
+  

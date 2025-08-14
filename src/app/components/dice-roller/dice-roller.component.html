@@ -1,6 +1,65 @@
-<h3 nz-typography>Tiradas</h3>
-<div class="row">
-  <input nz-input [(ngModel)]="notation" />
-  <button nz-button (click)="roll()">🎲 Tirar</button>
+<div class="roller">
+  <div class="hdr">
+    <h4 nz-typography class="ttl">🎲 Tiradas</h4>
+    <nz-tag nzColor="blue" nz-tooltip nzTooltipTitle="Click en un dado = tirar. Shift/Ctrl/⌘ = solo seleccionar.">
+      {{ notation() }}
+    </nz-tag>
+  </div>
+
+  <!-- Dados: click = tirar; Shift/Ctrl/⌘ = seleccionar -->
+  <div class="types">
+    <button
+      nz-button
+      *ngFor="let t of types"
+      [nzType]="faces() === t ? 'primary' : 'default'"
+      (click)="onDieClick(t, $event)">
+      🎲 d{{ t }}
+    </button>
+  </div>
+
+  <!-- Controles de cantidad y modificador -->
+  <div class="row">
+    <div class="field">
+      <label nz-typography>Cantidad</label>
+      <div class="inline">
+        <button nz-button (click)="incQty(-1)" nzSize="small">−</button>
+        <nz-input-number
+          [ngModel]="qty()"
+          (ngModelChange)="qty.set($event || 1)"
+          [nzMin]="1" [nzMax]="50" [nzStep]="1">
+        </nz-input-number>
+        <button nz-button (click)="incQty(1)" nzSize="small">+</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label nz-typography>Modificador</label>
+      <div class="inline">
+        <button nz-button (click)="incMod(-1)" nzSize="small">−</button>
+        <nz-input-number
+          [ngModel]="mod()"
+          (ngModelChange)="mod.set($event || 0)"
+          [nzMin]="-999" [nzMax]="999" [nzStep]="1">
+        </nz-input-number>
+        <button nz-button (click)="incMod(1)" nzSize="small">+</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Presets rápidos (tiran directamente) -->
+  <div class="presets">
+    <span class="hint">Rápidos:</span>
+    <button nz-button nzSize="small" (click)="setPreset(1,20,0)">🎲 1d20</button>
+    <button nz-button nzSize="small" (click)="setPreset(2,6,0)">🎲 2d6</button>
+    <button nz-button nzSize="small" (click)="setPreset(1,12,0)">🎲 1d12</button>
+    <button nz-button nzSize="small" (click)="setPreset(1,10,0)">🎲 1d10</button>
+    <button nz-button nzSize="small" (click)="setPreset(1,8,0)">🎲 1d8</button>
+    <button nz-button nzSize="small" (click)="setPreset(1,4,0)">🎲 1d4</button>
+    <button nz-button nzSize="small" (click)="setPreset(1,100,0)">🎲 1d100</button>
+  </div>
+
+  <!-- Botón extra (opcional) por si alguien prefiere revisar antes de lanzar) -->
+  <div class="actions">
+    <button nz-button (click)="roll()">🎲 Tirar</button>
+  </div>
 </div>
-<p class="small">Formato: <code>XdY+Z</code> (p.ej. 2d6+3)</p>

@@ -1,0 +1,138 @@
+<div class="tracker2">
+    <!-- Cabecera -->
+    <div class="hdr">
+      <h3 nz-typography class="title">{{ headerText() }}</h3>
+      <div class="right">
+        <button nz-button nzSize="small" (click)="toggleMute()">{{ muted() ? '🔕' : '🔔' }}</button>
+      </div>
+    </div>
+  
+    <!-- Vista PRE-combate: solo presencia -->
+    <ng-container *ngIf="!inCombat(); else combatView">
+      <nz-card class="pre">
+        <div class="pre-row">
+          <div>
+            <h4 nz-typography>Esperando a que el DM inicie el combate…</h4>
+            <p class="muted">Jugadores conectados:</p>
+            <div class="tags">
+              <nz-tag *ngFor="let p of players()">{{ p.name }}</nz-tag>
+              <span *ngIf="!players().length" class="muted">— (vacío)</span>
+            </div>
+          </div>
+        </div>
+      </nz-card>
+  
+      <!-- Mini log -->
+      <div class="log">
+        <nz-divider nzText="Últimos eventos" class="thin"></nz-divider>
+        <div class="log-items">
+          <div class="log-i" *ngFor="let l of miniLog()">
+            <span class="k" [attr.data-k]="l.kind"></span>
+            <span class="t" [innerText]="l.text"></span>
+          </div>
+          <div class="log-i empty" *ngIf="!miniLog().length">Aún no hay actividad.</div>
+        </div>
+      </div>
+    </ng-container>
+  
+    <!-- Vista de combate -->
+    <ng-template #combatView>
+      <!-- Turno activo -->
+      <nz-card class="active-card">
+        <div class="left">
+          <nz-badge [nzCount]="active()?.init" [nzTitle]="'Iniciativa'">
+            <nz-avatar
+              class="avatar"
+              [nzSrc]="active()?.meta?.img || null"
+              [nzText]="!active()?.meta?.img ? initials(active()?.name || '') : null">
+            </nz-avatar>
+          </nz-badge>
+          <div class="info">
+            <div class="name">{{ active()?.name }}</div>
+            <div class="meta">
+              <nz-tag nzColor="blue">Turno activo</nz-tag>
+              <nz-tag *ngIf="acLabel(active()) as ac">{{ ac }}</nz-tag>
+
+            </div>
+          </div>
+        </div>
+  
+        <div class="right">
+          <div class="timer">
+            <div class="time">{{ timeLeftLabel() }}</div>
+            <nz-progress
+              [nzPercent]="progress()"
+              nzShowInfo="false"
+              nzStatus="active"
+              [nzStrokeWidth]="10">
+            </nz-progress>
+          </div>
+          <div class="next">
+            <span class="lbl">Siguientes:</span>
+            <div class="chips">
+              <span class="chip" *ngFor="let n of nextUp()">{{ n.name }}</span>
+              <span class="chip empty" *ngIf="!nextUp().length">—</span>
+            </div>
+          </div>
+        </div>
+      </nz-card>
+  
+      <!-- Lista de combatientes -->
+      <div class="grid">
+        <nz-card
+          class="unit"
+          *ngFor="let e of list(); let i = index"
+          [class.active]="isActive(i)">
+          <div class="unit-hdr">
+            <nz-badge [nzCount]="e.init" [nzTitle]="'Iniciativa'">
+              <nz-avatar
+                class="u-avatar"
+                [nzSrc]="e.meta?.img || null"
+                [nzText]="!e.meta?.img ? initials(e.name) : null">
+              </nz-avatar>
+            </nz-badge>
+            <div class="u-name" [title]="e.name">{{ e.name }}</div>
+            <div class="u-tags">
+              <nz-tag *ngIf="e.meta?.isNPC" nzColor="gold">NPC</nz-tag>
+              <nz-tag *ngIf="e.meta?.note" nz-tooltip nzTooltipTitle="{{ e.meta?.note }}">📝</nz-tag>
+              <nz-tag *ngIf="e.meta?.ac">CA {{ e.meta?.ac }}</nz-tag>
+            </div>
+          </div>
+  
+          <!-- Barra de vida si hay datos -->
+          <div class="hp" *ngIf="hpPercent(e) !== null; else nohp">
+            <div class="hp-row">
+              <div class="hp-label">HP</div>
+              <div class="hp-val">
+                <div class="hp-bar">
+                  <div class="hp-fill" [style.width.%]="hpPercent(e) || 0"></div>
+                </div>
+                <span class="hp-text">{{ e.meta?.hp }}/{{ e.meta?.maxHp }}</span>
+              </div>
+            </div>
+          </div>
+          <ng-template #nohp>
+            <div class="nohp muted">—</div>
+          </ng-template>
+  
+          <!-- Condiciones -->
+          <div class="conds" *ngIf="e.meta?.conditions?.length">
+            <nz-tag nzColor="red" *ngFor="let c of e.meta?.conditions">{{ c }}</nz-tag>
+          </div>
+        </nz-card>
+      </div>
+  
+      <!-- Mini log -->
+      <div class="log under">
+        <nz-divider nzText="Últimos eventos" class="thin"></nz-divider>
+        <div class="log-items">
+          <div class="log-i" *ngFor="let l of miniLog()">
+            <span class="k" [attr.data-k]="l.kind"></span>
+            <span class="t" [innerText]="l.text"></span>
+          </div>
+          <div class="log-i empty" *ngIf="!miniLog().length">Esperando acciones…</div>
+        </div>
+      </div>
+    </ng-template>
+  </div>
+  

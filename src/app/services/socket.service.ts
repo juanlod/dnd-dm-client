@@ -1,29 +1,43 @@
 import { Injectable } from '@angular/core';
 import { io, Socket } from 'socket.io-client';
-import { Observable, Subject } from 'rxjs';
+import { Subject, Observable } from 'rxjs';
 
-export interface JoinedPayload { roomId: string; nickname: string; }
-export interface ChatPayload { from: string; text: string; ts: number; }
-export interface DmPayload   { from: 'DM'; text: string; ts: number; }
-export interface RollPayload  { from: string; notation: string; detail: string; rolls: number[]; total: number; ts: number; }
+export interface JoinedPayload { roomId: string; nickname: string; role?: 'dm' | 'player'; }
+export interface ChatPayload   { from: string; text: string; ts: number; }
+export interface DmPayload     { from: 'DM'; text: string; ts: number; }
+export interface RollPayload   { from: string; notation: string; detail: string; rolls: number[]; total: number; ts: number; }
+export interface RoomPlayer    { id: string; name: string; role?: 'dm' | 'player'; }
+
+export interface CombatUpdate {
+  roomId: string;
+  list: { id: string; name: string; init: number }[];
+  round: number;
+  turnIndex: number;
+  durationSec?: number;
+  autoAdvance?: boolean;
+  autoDelaySec?: number;
+  running?: boolean;
+  endAt?: number;
+  serverNow?: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class SocketService {
   private socket?: Socket;
   private connected = false;
-  private readonly url = 'http://localhost:3000'; // ajusta si tu backend no corre aquí
+  private readonly url = 'http://localhost:3000';
 
-  // Eventos de app
-  joined$ = new Subject<JoinedPayload>();
-  system$ = new Subject<string>();
-  chat$   = new Subject<ChatPayload>();
-  dm$     = new Subject<DmPayload>();
-  roll$   = new Subject<RollPayload>();
+  joined$   = new Subject<JoinedPayload>();
+  system$   = new Subject<string>();
+  chat$     = new Subject<ChatPayload>();
+  dm$       = new Subject<DmPayload>();
+  roll$     = new Subject<RollPayload>();
+  players$  = new Subject<RoomPlayer[]>();
+  combat$   = new Subject<CombatUpdate>();
 
-  // Señales de conexión (útil para auto-join)
-  ready$      = new Subject<void>();       // se emite en cada connect/reconnect
-  connected$  = new Subject<boolean>();    // true/false
-  connectErr$ = new Subject<any>();        // errores de conexión
+  ready$      = new Subject<void>();
+  connected$  = new Subject<boolean>();
+  connectErr$ = new Subject<any>();
 
   connect(): void {
     if (this.connected && this.socket) return;
@@ -36,43 +50,40 @@ export class SocketService {
       reconnectionDelay: 600,
     });
 
-    this.socket.on('connect', () => {
-      this.connected = true;
-      this.connected$.next(true);
-      this.ready$.next(); // listo para emitir eventos como join
-    });
-
-    this.socket.on('reconnect', () => {
-      this.connected = true;
-      this.connected$.next(true);
-      this.ready$.next(); // también en cada reconexión
-    });
-
-    this.socket.on('disconnect', () => {
-      this.connected = false;
-      this.connected$.next(false);
-    });
-
+    this.socket.on('connect', () => { this.connected = true; this.connected$.next(true); this.ready$.next(); });
+    this.socket.on('reconnect', () => { this.connected = true; this.connected$.next(true); this.ready$.next(); });
+    this.socket.on('disconnect', () => { this.connected = false; this.connected$.next(false); });
     this.socket.io.on('error', (err: any) => this.connectErr$.next(err));
     this.socket.on('connect_error', (err: any) => this.connectErr$.next(err));
 
-    // Canalización de mensajes
-    this.socket.on('joined', (data: JoinedPayload) => this.joined$.next(data));
-    this.socket.on('system', (msg: string) => this.system$.next(msg));
-    this.socket.on('chat', (msg: ChatPayload) => this.chat$.next(msg));
-    this.socket.on('dm', (msg: DmPayload) => this.dm$.next(msg));
-    this.socket.on('roll', (msg: RollPayload) => this.roll$.next(msg));
+    this.socket.on('joined',    (d: JoinedPayload)  => this.joined$.next(d));
+    this.socket.on('system',    (t: string)         => this.system$.next(t));
+    this.socket.on('chat',      (m: ChatPayload)    => this.chat$.next(m));
+    this.socket.on('dm',        (m: DmPayload)      => this.dm$.next(m));
+    this.socket.on('roll',      (m: RollPayload)    => this.roll$.next(m));
+    this.socket.on('presence',  (arr: RoomPlayer[]) => this.players$.next(arr));
+    this.socket.on('combat:update', (st: CombatUpdate) => this.combat$.next(st));
   }
 
-  join(roomId: string, name: string) {
-    this.socket?.emit('join', { roomId, name });
+  join(roomId: string, name: string, role: 'dm' | 'player' = 'player') {
+    this.socket?.emit('join', { roomId, name, role });
   }
-  sendMessage(text: string, dm = false) {
-    this.socket?.emit('chat', { text, dm });
-  }
-  rollDice(notation: string) {
-    this.socket?.emit('roll', { notation });
-  }
+  sendMessage(text: string, dm = false) { this.socket?.emit('chat', { text, dm }); }
+  rollDice(notation: string)            { this.socket?.emit('roll', { notation }); }
+  requestPresence()                      { this.socket?.emit('getPresence'); }
+  announce(text: string)                 { this.socket?.emit('announce', { text }); }
+
+  // Combate (idéntico a antes)
+  combatGet()                                      { this.socket?.emit('combat:get'); }
+  combatStart(opts: { durationSec?: number; autoAdvance?: boolean; autoDelaySec?: number }) { this.socket?.emit('combat:start', opts); }
+  combatReroll()                                   { this.socket?.emit('combat:reroll'); }
+  combatNext()                                     { this.socket?.emit('combat:next'); }
+  combatPrev()                                     { this.socket?.emit('combat:prev'); }
+  combatEnd()                                      { this.socket?.emit('combat:end'); }
+  combatSyncPlayers()                              { this.socket?.emit('combat:syncPlayers'); }
+  combatSettings(opts: { durationSec?: number; autoAdvance?: boolean; autoDelaySec?: number }) { this.socket?.emit('combat:settings', opts); }
+  combatPause()                                    { this.socket?.emit('combat:pause'); }
+  combatResume()                                   { this.socket?.emit('combat:resume'); }
 
   on<T = any>(event: string): Observable<T> {
     return new Observable<T>(observer => {
@@ -80,7 +91,5 @@ export class SocketService {
     });
   }
 
-  isConnected(): boolean {
-    return this.connected;
-  }
+  isConnected(): boolean { return this.connected; }
 }

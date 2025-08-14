@@ -1,2 +1,45 @@
-.row { display: flex; gap: 8px; margin-bottom: 4px; align-items: center; max-width: 340px; }
-.small { color: #888; }
+.roller {
+  display: grid;
+  gap: 10px;
+}
+
+.notation {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.types {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 6px;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.field label {
+  display: block;
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-bottom: 4px;
+}
+.inline { display: flex; align-items: center; gap: 6px; }
+
+.presets {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.presets .hint {
+  font-size: 12px;
+  color: #8c8c8c;
+  margin-right: 2px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+}

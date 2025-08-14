@@ -4,8 +4,15 @@
     <h3 nz-typography class="side-title">{{ headerText() }}</h3>
 
     <section class="panel">
+      <app-initiative-tracker></app-initiative-tracker>
+    </section>
+    
+
+    <section class="panel">
       <app-dice-roller></app-dice-roller>
     </section>
+
+
 
     <section class="panel">
       <h4 nz-typography>DM</h4>
@@ -16,7 +23,6 @@
   <!-- Main chat -->
   <section class="chat">
     <div class="chat-header">
-      <div class="room">{{ headerText() }}</div>
       <div class="header-actions">
         <button
           nz-button

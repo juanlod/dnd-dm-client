@@ -22,6 +22,7 @@ import { DiceRollerComponent } from '../dice-roller/dice-roller.component';
 
 // Sanitizador para render “markdown” ligero de forma segura
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { InitiativeTrackerComponent } from '../initiative-tracker/initiative-tracker.component';
 
 @Component({
   selector: 'app-chat',
@@ -31,7 +32,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
     NgFor, NgIf, FormsModule,
     NzInputModule, NzButtonModule, NzTypographyModule,
     NzAvatarModule, NzTagModule, NzPopconfirmModule,
-    DiceRollerComponent
+    DiceRollerComponent, InitiativeTrackerComponent
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
