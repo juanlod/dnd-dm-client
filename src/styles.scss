@@ -163,3 +163,56 @@ html, body { height: 100%; margin: 0; }
     .sidebar { border-right: 0; padding-right: 0; }
   }
   
+
+
+  /* ===== Cursor de espada global (solo dentro de la app) ===== */
+
+/* Variables para no repetir rutas/coords */
+:root {
+    /* Hotspots: <url> X Y, fallback */
+    --cursor-sword: url('assets/cursors/sword-default.png') 2 2, auto;
+    --cursor-sword-pointer: url('assets/cursors/sword-default.png') 10 4, pointer;
+  }
+  
+  /* Limita el cursor a la app. Si tu raíz es otra, ajústalo (por ej. app-root) */
+  .app-shell {
+    /* Aplica por defecto a todo dentro de la app */
+    cursor: var(--cursor-sword);
+  }
+  
+  /* Todo descendiente, EXCEPTO campos de texto/editables, también espada */
+  .app-shell *:not(input):not(textarea):not([contenteditable="true"]) {
+    cursor: var(--cursor-sword);
+  }
+  
+  /* Inputs/textarea/edición: I-Beam normal */
+  .app-shell input,
+  .app-shell textarea,
+  .app-shell [contenteditable="true"] {
+    cursor: text;
+  }
+  
+  /* Elementos “clickables”: usa la variante de puntero */
+  .app-shell a,
+  .app-shell button,
+  .app-shell [role="button"],
+  .app-shell .ant-btn,
+  .app-shell .nz-btn,
+  .app-shell .clickable,
+  .app-shell [nz-button],
+  .app-shell [routerLink] {
+    cursor: var(--cursor-sword-pointer);
+  }
+  
+  /* Elementos que muestran “mover”, “prohibido”, “redimensionar” — opcional */
+  .app-shell [draggable="true"] { cursor: move; }
+  .app-shell .resize-ew { cursor: ew-resize; }
+  .app-shell .resize-ns { cursor: ns-resize; }
+  .app-shell .not-allowed { cursor: not-allowed; }
+  
+  /* Si necesitas desactivar el cursor de espada en alguna zona concreta,
+     añade la clase .cursor-auto a ese contenedor */
+  .cursor-auto, .cursor-auto * {
+    cursor: auto !important;
+  }
+  

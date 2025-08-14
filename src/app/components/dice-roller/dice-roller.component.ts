@@ -20,7 +20,7 @@ import { ChatService } from '../../services/chat.service';
 })
 export class DiceRollerComponent {
   private chat = inject(ChatService);
-  readonly types = [4, 6, 8, 10, 12, 20, 100];
+  readonly types = [4, 6, 8, 10, 12, 13, 20, 100];
 
   qty = signal<number>(1);
   faces = signal<number>(20);
