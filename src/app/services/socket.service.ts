@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
-import { Subject, Observable } from 'rxjs';
 
 export interface JoinedPayload { roomId: string; nickname: string; role?: 'dm' | 'player'; }
 export interface ChatPayload { from: string; text: string; ts: number; }
@@ -38,6 +38,8 @@ export class SocketService {
   ready$ = new Subject<void>();
   connected$ = new Subject<boolean>();
   connectErr$ = new Subject<any>();
+  /** Emite cuando el servidor pide limpiar el chat */
+  readonly chatCleared$ = new Subject<{ by: string; ts: number }>();
 
   connect(): void {
     if (this.connected && this.socket) return;
@@ -63,6 +65,9 @@ export class SocketService {
     this.socket.on('roll', (m: RollPayload) => this.roll$.next(m));
     this.socket.on('presence', (arr: RoomPlayer[]) => this.players$.next(arr));
     this.socket.on('combat:update', (st: CombatUpdate) => this.combat$.next(st));
+    this.socket.on('chat:cleared', (p: { by: string; ts: number }) => {
+      this.chatCleared$.next(p);
+    });
   }
 
   join(roomId: string, name: string, role: 'dm' | 'player' = 'player') {
@@ -92,21 +97,40 @@ export class SocketService {
   combatFinishTurn() {
     this.socket?.emit('combat:finishTurn');
   }
+  // === NUEVO: acciones ===
+  clearChat(by?: string) {
+    this.socket?.emit('chat:clear', { by });
+  }
+  resetDM() {
+    this.socket?.emit('dm:reset');
+  }
 
+
+
+
+
+
+
+
+
+
+  
   public emit(event: string, payload?: any): void {
     this.socket?.emit(event, payload);
   }
-  
+
   /** Pasarela para suscribirse a eventos arbitrarios */
   public on(event: string, handler: (...args: any[]) => void): void {
     this.socket?.on(event, handler);
   }
-  
+
   /** Anular suscripción */
   public off(event: string, handler?: (...args: any[]) => void): void {
     // handler opcional: si no lo pasas, elimina todos los listeners de ese evento
     if (handler) this.socket?.off(event, handler);
     else this.socket?.off(event);
   }
+
+
 
 }

@@ -1,39 +1,33 @@
 <div class="chat-layout">
-  <!-- Sidebar -->
-  <aside class="sidebar">
+  <!-- Sidebar IZQUIERDA -->
+  <aside class="sidebar left">
     <h3 nz-typography class="side-title">{{ headerText() }}</h3>
 
     <section class="panel">
       <app-character-sheet></app-character-sheet>
     </section>
 
-    <section class="panel">
-      <app-initiative-tracker></app-initiative-tracker>
-    </section>
-    
-    <section class="panel">
-      <app-dice-roller></app-dice-roller>
-    </section>
-
-    <section class="panel">
-      <h4 nz-typography>DM</h4>
-      <p class="small">Escribe <code>@dm</code> al inicio para hablar con la IA de DM.</p>
-    </section>
   </aside>
 
-  <!-- Main chat -->
+  <!-- CHAT principal -->
   <section class="chat">
     <div class="chat-header">
       <div class="header-actions">
-        <button
-          nz-button
-          nzDanger
-          nzSize="small"
-          nz-popconfirm
-          nzPopconfirmTitle="¿Salir de la mesa?"
-          nzPopconfirmOkText="Salir"
-          nzPopconfirmCancelText="Cancelar"
-          (nzOnConfirm)="leaveRoom()">
+        <button nz-button nzSize="small" (click)="onClearChat()">Vaciar chat</button>
+
+        <button nz-button nzSize="small" nzDanger nz-popconfirm
+                nzPopconfirmTitle="¿Reiniciar contexto del DM para esta mesa?"
+                nzPopconfirmOkText="Sí, reiniciar"
+                nzPopconfirmCancelText="Cancelar"
+                (nzOnConfirm)="onResetDM()">
+          Reiniciar DM
+        </button>
+
+        <button nz-button nzDanger nzSize="small" nz-popconfirm
+                nzPopconfirmTitle="¿Salir de la mesa?"
+                nzPopconfirmOkText="Salir"
+                nzPopconfirmCancelText="Cancelar"
+                (nzOnConfirm)="leaveRoom()">
           Salir de la mesa
         </button>
       </div>
@@ -96,4 +90,15 @@
       <li><button nz-button nzSize="small" (click)="insert('me acerco en sigilo')">Sigilo</button></li>
     </ul>
   </section>
+
+  <!-- Sidebar DERECHA -->
+  <aside class="sidebar right">
+    <section class="panel">
+      <app-initiative-tracker></app-initiative-tracker>
+    </section>
+
+    <section class="panel">
+      <app-dice-roller></app-dice-roller>
+    </section>
+  </aside>
 </div>

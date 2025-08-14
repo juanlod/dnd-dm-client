@@ -171,7 +171,7 @@ html, body { height: 100%; margin: 0; }
 :root {
     /* Hotspots: <url> X Y, fallback */
     --cursor-sword: url('assets/cursors/sword-default.png') 2 2, auto;
-    --cursor-sword-pointer: url('assets/cursors/sword-default.png') 10 4, pointer;
+    --cursor-sword-pointer: url('assets/cursors/gloves.png') 10 4, pointer;
   }
   
   /* Limita el cursor a la app. Si tu raíz es otra, ajústalo (por ej. app-root) */

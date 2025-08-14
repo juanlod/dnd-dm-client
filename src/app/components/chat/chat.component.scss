@@ -1,157 +1,191 @@
-/* ============================================================
-   Layout general: sidebar fija, chat ocupa todo lo demás
-   ============================================================ */
-   .chat-layout {
-    display: grid;
-    grid-template-columns: 420px minmax(0, 1fr); /* ← sidebar fija */
-    gap: 22px;
-    min-height: calc(100vh - 110px);
+/* ========= GRID: izquierda | chat | derecha (ancho adaptable) ========= */
+.chat-layout{
+  display:grid;
+  grid-template-columns: 360px minmax(0,1fr) clamp(380px,26vw,520px); /* ← derecha ancha */
+  gap:22px;
+  min-height:calc(100vh - 110px);
+}
+
+/* En pantallas medianas nos quedamos con dos columnas (la derecha baja) */
+@media (max-width:1200px){
+  .chat-layout{ grid-template-columns: 340px minmax(0,1fr); }
+}
+
+/* ========= SIDE BARS STICKY (con scroll propio) ========= */
+.sidebar{
+  align-self:start;
+  position: sticky;
+  top: var(--shell-offset, 72px);         /* ajusta si tu header mide más/menos */
+  max-height: calc(100dvh - var(--shell-offset,72px) - 16px);
+  overflow: auto;                         /* scroll propio */
+  border-right: 1px solid #eee;
+  padding-right:14px;
+  box-sizing:border-box;
+}
+
+/* Quita el borde de la izquierda en la derecha */
+.sidebar.right{
+  border-right:0;
+  border-left:1px solid #eee;
+  padding-left:14px;
+  padding-right:0;
+}
+
+/* En móvil/estrecho, las barras dejan de ser sticky y se apilan */
+@media (max-width:920px){
+  .sidebar,
+  .sidebar.right{
+    position: static;
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    padding: 0;
   }
-  
-  /* En pantallas muy anchas, un pelín más de sidebar (opcional) */
-  @media (min-width: 1600px) {
-    .chat-layout { grid-template-columns: 460px minmax(0, 1fr); }
-  }
-  
-  /* ------------------------------------------------------------
-     Sidebar
-     ------------------------------------------------------------ */
-  .sidebar {
-    border-right: 1px solid #eee;
-    padding-right: 14px;
-    box-sizing: border-box;
-  }
-  
-  .side-title { margin-top: 4px; }
-  
-  /* Paneles dentro de la sidebar */
-  .panel {
-    margin: 16px 0;
-    padding: 14px;
-    border: 1px solid #f0f0f0;
-    border-radius: 10px;
-    background: #fff;
-    box-sizing: border-box;
-    overflow: hidden; /* evita desbordes visuales */
-  }
-  
-  .small { color: #8c8c8c; }
-  
-  /* ============================================================
-     Columna principal del chat
-     ============================================================ */
+}
+
+/* ========= Paneles visuales de las sidebars ========= */
+.panel{
+  margin:16px 0;
+  padding:14px;
+  border:1px solid #f0f0f0;
+  border-radius:10px;
+  background:#fff;
+  box-sizing:border-box;
+}
+
+/* ========= Tracker: tarjeta “Turno activo” más ancha (dos columnas) ========= */
+.tracker2 .active-card{
+  display:grid;
+  grid-template-columns: 1.1fr 0.9fr;    /* izquierda: identidad | derecha: timer/siguientes */
+  gap:14px;
+  align-items:center;
+}
+@media (max-width:1400px){
+  .tracker2 .active-card{ grid-template-columns: 1.2fr 0.8fr; }
+}
+@media (max-width:920px){
+  .tracker2 .active-card{ grid-template-columns: 1fr; }
+}
+.tracker2 .active-card .info .name{ font-size:16px; font-weight:700; }
+.tracker2 .active-card .right .timer nz-progress,
+.tracker2 .active-card .right .timer .time{ width:100%; }
+.tracker2 .active-card .right .chips{ display:flex; flex-wrap:wrap; gap:6px; }
+
+/* ========= Dice Roller en la sidebar derecha: botones anchos ========= */
+.sidebar.right app-dice-roller .types{
+  display:grid !important;
+  grid-template-columns: repeat(4, minmax(84px,1fr));
+  gap:8px;
+}
+.sidebar.right app-dice-roller .types [nz-button]{
+  display:block; width:100%;
+}
+.sidebar.right app-dice-roller .row{
+  display:grid; grid-template-columns:1fr 1fr; gap:10px;
+}
+.sidebar.right app-dice-roller .row .inline nz-input-number{
+  width:100%; max-width:96px;
+}
+
+/* ========= Chat log con scroll independiente (por si aún no lo tenías) ========= */
+.chat{ display:flex; flex-direction:column; min-height:60vh; }
+.log{
+  flex:1;
+  min-height:0;              /* ¡clave para que el overflow funcione dentro del grid/flex! */
+  overflow:auto;
+  padding:12px;
+  border:1px solid #e8e8e8;
+  border-radius:10px;
+  background:
+    radial-gradient(600px 300px at 100% -20%, rgba(149,114,252,.06), transparent 60%),
+    radial-gradient(600px 300px at -20% 100%, rgba(16,185,129,.06), transparent 60%),
+    #fcfcfd;
+  color:#111827;
+}
+/* Altura del header fijo; ajusta si tu navbar mide distinto */
+:root { --shell-offset: 72px; }
+
+/* La columna central del chat: altura limitada + sin scroll propio */
+.chat {
+  display: flex;
+  flex-direction: column;
+
+  /* 👇 clave para que el hijo .log pueda scrollear */
+  min-height: 0;
+
+  /* 👇 limitamos la altura del área de chat a la ventana visible */
+  height: calc(100dvh - var(--shell-offset, 72px) - 16px);
+
+  /* que no haga scroll este contenedor, solo el .log */
+  overflow: hidden;
+}
+
+/* El log sí scrollea */
+.log {
+  flex: 1 1 auto;
+
+  /* 👇 clave dentro de flex/grid */
+  min-height: 0;
+
+  overflow: auto;
+  will-change: transform;       /* suaviza en algunos navegadores */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Por si un grid impide crecer al ítem central */
+.chat-layout { align-items: start; }
+
+/* Modo móvil: dejamos que la página scrollee y ponemos un tope al log si quieres */
+@media (max-width: 920px) {
   .chat {
-    display: flex;
-    flex-direction: column;
-    min-height: 60vh;
+    height: auto;
+    overflow: visible;
   }
-  
-  /* Cabecera del chat */
-  .chat-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 2px 8px;
-    border-bottom: 1px solid #f0f0f0;
-    margin-bottom: 8px;
-  }
-  .chat-header .room { font-weight: 700; }
-  .chat-header .header-actions { margin-left: auto; }
-  
-  /* ============================================================
-     Log de mensajes
-     ============================================================ */
   .log {
-    flex: 1;
-    overflow: auto;
-    padding: 12px;
-    border: 1px solid #e8e8e8;
-    border-radius: 10px;
-    background:
-      radial-gradient(600px 300px at 100% -20%, rgba(149,114,252,0.06), transparent 60%),
-      radial-gradient(600px 300px at -20% 100%, rgba(16,185,129,0.06), transparent 60%),
-      #fcfcfd;
-    color: #111827;
-    box-sizing: border-box;
+    max-height: 50vh;           /* opcional: para que no ocupe todo */
   }
-  .log * { color: inherit; }
+}
+
+
+/* --- Log: fondo transparente --- */
+.log {
+  /* el scroll sigue activo por overflow:auto, pero sin fondo */
+  background: transparent !important;
+  border: 1px solid rgba(0,0,0,.08); /* opcional: conserva el borde suave */
   
-  /* Fila de mensaje */
-  .row {
-    display: grid;
-    grid-template-columns: 36px 1fr;
-    gap: 10px;
-    margin-bottom: 12px;
-    align-items: start;
-  }
-  .row.mine { grid-template-columns: 1fr 36px; }
-  .row.mine .avatar { order: 2; }
-  .row.mine .bubble { order: 1; }
-  
-  /* Avatares (paleta determinista) */
-  .avatar { user-select: none; }
-  .avatar.c1 { background:#e6f4ff; color:#0958d9; }
-  .avatar.c2 { background:#fff1f0; color:#d4380d; }
-  .avatar.c3 { background:#f6ffed; color:#389e0d; }
-  .avatar.c4 { background:#f9f0ff; color:#722ed1; }
-  .avatar.c5 { background:#fffbe6; color:#d4b106; }
-  .avatar.c6 { background:#e6fffb; color:#13c2c2; }
-  
-  /* Burbujas */
-  .bubble {
-    padding: 8px 10px;
-    border-radius: 10px;
-    border: 1px solid #eee;
-    background: #fff;
-    box-shadow: 0 1px 0 rgba(0,0,0,.02);
-    max-width: 100%;
-    word-wrap: break-word;
-    color: #111827;
-  }
-  .row.mine .bubble { background:#eef6ff; border-color:#bae0ff; }
-  .row.dm   .bubble { background:#f6ffed; border-color:#b7eb8f; }
-  .row.roll .bubble { background:#fff7e6; border-color:#ffd591; }
-  .row.system .bubble { background:#fafafa; border-style:dashed; text-align:left; color:#6b7280; }
-  
-  /* Meta (nombre/hora) */
-  .meta {
-    display:flex; align-items:center; gap:6px; margin-bottom:4px;
-    font-size:12px; color:#6b7280;
-  }
-  .meta .from { font-weight:700; color:#111827; }
-  .meta .time { margin-left:auto; }
-  
-  /* Texto del mensaje */
-  .text { white-space: pre-wrap; line-height:1.45; }
-  .text a { text-decoration: underline; }
-  .text code {
-    background:#f4f4f5; border-radius:4px; padding:0 4px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  }
-  .text.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Courier New", monospace; }
-  
-  /* Indicador "DM escribiendo..." */
-  .row.typing .typing-bubble { display:inline-flex; align-items:center; }
-  .dots { display:inline-flex; gap:4px; padding:6px 4px; }
-  .dots span { width:6px; height:6px; border-radius:50%; background:#9aa3af; animation: blink 1.4s infinite both; }
-  .dots span:nth-child(2) { animation-delay:.2s; }
-  .dots span:nth-child(3) { animation-delay:.4s; }
-  @keyframes blink { 0%,80%,100%{opacity:.2} 40%{opacity:1} }
-  
-  /* Composer */
-  .composer {
-    display:grid; grid-template-columns: 1fr auto;
-    gap:10px; margin-top:10px; padding-top:10px; border-top:1px solid #f0f0f0;
-  }
-  .suffix-hint { color:#9aa3af; font-size:12px; }
-  
-  /* Chips */
-  .chips { display:flex; flex-wrap:wrap; gap:6px; padding:0; margin:8px 0 0; list-style:none; }
-  .chips.under { margin-top:10px; }
-  
-  /* Responsivo */
-  @media (max-width: 920px) {
-    .chat-layout { grid-template-columns: 1fr; }
-    .sidebar { border-right: 0; padding-right: 0; }
-  }
-  
+  /* scrollbar moderno (Firefox) */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,.28) transparent; /* thumb | track */
+}
+
+/* WebKit (Chromium/Safari/Edge) */
+.log::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+.log::-webkit-scrollbar-track {
+  background: transparent;           /* 👈 pista transparente */
+}
+.log::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,.28); /* color del thumb */
+  border-radius: 8px;
+  border: 2px solid transparent;     /* crea padding visual sin pintar el track */
+  background-clip: padding-box;
+}
+.log:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(0,0,0,.42); /* un poco más visible al pasar el ratón */
+}
+.log::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Modo oscuro (opcional) */
+:root[color-scheme='dark'] .log {
+  scrollbar-color: rgba(255,255,255,.35) transparent;
+}
+:root[color-scheme='dark'] .log::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,.28);
+}
+:root[color-scheme='dark'] .log:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(255,255,255,.45);
+}

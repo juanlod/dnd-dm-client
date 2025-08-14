@@ -24,6 +24,7 @@ import { DiceRollerComponent } from '../dice-roller/dice-roller.component';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { InitiativeTrackerComponent } from '../initiative-tracker/initiative-tracker.component';
 import { CharacterSheetComponent } from '../character-sheet/character-sheet.component';
+import { SocketService } from 'src/app/services/socket.service';
 
 @Component({
   selector: 'app-chat',
@@ -39,10 +40,12 @@ import { CharacterSheetComponent } from '../character-sheet/character-sheet.comp
   styleUrl: './chat.component.scss'
 })
 export class ChatComponent implements OnInit, OnDestroy {
+
   // --- Inyecciones de dependencias ---
   private chat = inject(ChatService);       // Orquesta la conexión y la lista de mensajes
   private sanitizer = inject(DomSanitizer); // Para “bypassear” HTML seguro del markdown
   private router = inject(Router);          // Para navegar al salir de la mesa
+  private socket = inject(SocketService);          // Para navegar al salir de la mesa
 
   // --- Estado de la vista ---
   messages: Message[] = []; // Lista que pintamos en la log
@@ -257,6 +260,18 @@ export class ChatComponent implements OnInit, OnDestroy {
     const threshold = 80; // distancia en px al borde inferior para considerarlo “cerca”
     return el.scrollHeight - (el.scrollTop + el.clientHeight) < threshold;
   }
+
+  
+  onClearChat() {
+    // Limpia local + notifica a toda la sala
+    this.chat.clearLocal();
+    this.socket.clearChat(/* by */ this.chat['name'] || 'Jugador');
+  }
+
+  onResetDM() {
+    this.socket.resetDM();
+  }
+
 
   // Solo para recordar que no interceptamos Enter global: el input ya lo maneja
   @HostListener('window:keydown.enter', ['$event'])
