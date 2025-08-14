@@ -85,17 +85,28 @@ export class SocketService {
   combatPause() { this.socket?.emit('combat:pause'); }
   combatResume() { this.socket?.emit('combat:resume'); }
 
-  on<T = any>(event: string): Observable<T> {
-    return new Observable<T>(observer => {
-      this.socket?.on(event, (data: T) => observer.next(data));
-    });
-  }
 
   isConnected(): boolean { return this.connected; }
 
   // En src/app/services/socket.service.ts
   combatFinishTurn() {
     this.socket?.emit('combat:finishTurn');
+  }
+
+  public emit(event: string, payload?: any): void {
+    this.socket?.emit(event, payload);
+  }
+  
+  /** Pasarela para suscribirse a eventos arbitrarios */
+  public on(event: string, handler: (...args: any[]) => void): void {
+    this.socket?.on(event, handler);
+  }
+  
+  /** Anular suscripción */
+  public off(event: string, handler?: (...args: any[]) => void): void {
+    // handler opcional: si no lo pasas, elimina todos los listeners de ese evento
+    if (handler) this.socket?.off(event, handler);
+    else this.socket?.off(event);
   }
 
 }
