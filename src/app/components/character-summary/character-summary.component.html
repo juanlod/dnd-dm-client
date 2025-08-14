@@ -1,0 +1,107 @@
+<nz-card class="summary-card" nzTitle="🧝 Ficha (resumen)">
+    <!-- Cabecera -->
+    <div class="head">
+      <nz-avatar
+        class="avatar"
+        [nzSrc]="sheetSig().image || null"
+        [nzText]="(sheetSig().name || '?').slice(0,2).toUpperCase()">
+      </nz-avatar>
+  
+      <div class="title">
+        <div class="name" nz-typography>{{ sheetSig().name || '—' }}</div>
+        <ul class="chips">
+          <li class="chip"><b>Clase</b> {{ sheetSig().clazz || '—' }}</li>
+          <li class="chip"><b>Nivel</b> {{ sheetSig().level }}</li>
+          <li class="chip"><b>Linaje</b> {{ sheetSig().ancestry || '—' }}</li>
+          <li class="chip"><b>Alineamiento</b> {{ sheetSig().alignment || '—' }}</li>
+        </ul>
+      </div>
+    </div>
+  
+    <!-- Stats clave -->
+    <div class="stats">
+      <div class="stat">
+        <div class="label">CA</div>
+        <div class="value">{{ sheetSig().ac ?? '—' }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">PG</div>
+        <div class="value">{{ sheetSig().hp }}/{{ sheetSig().maxHp }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Velocidad</div>
+        <div class="value">{{ sheetSig().speed || 0 }} ft</div>
+      </div>
+      <div class="stat">
+        <div class="label">Competencia</div>
+        <div class="value">+{{ prof() }}</div>
+      </div>
+      <div class="stat">
+        <div class="label">Percepción pasiva</div>
+        <div class="value">{{ pp() }}</div>
+      </div>
+    </div>
+  
+    <!-- Atributos -->
+    <div class="abilities">
+      <div class="ability" *ngFor="let k of abilitiesOrder">
+        <div class="top">
+          <span class="name">{{ labelAbility(k) }}</span>
+          <span class="abbr">{{ k.toUpperCase() }}</span>
+        </div>
+        <div class="mid">
+          <span class="mod">{{ mod(sheetSig().abilities[k]) >= 0 ? '+' : '' }}{{ mod(sheetSig().abilities[k]) }}</span>
+          <span class="score">{{ sheetSig().abilities[k] }}</span>
+        </div>
+      </div>
+    </div>
+  
+    <!-- XP -->
+    <div class="xp" *ngIf="xp() > 0 || sheetSig().level > 1">
+      <div class="xp-head">
+        <span class="pill">Nivel {{ sheetSig().level }}</span>
+        <span class="pill">PX {{ xp() | number }}</span>
+      </div>
+      <nz-progress class="bar" [nzPercent]="xpProgress()" [nzStrokeWidth]="10"
+                   [nzStatus]="(xpProgress()===100 && sheetSig().level===20) ? 'success' : 'active'">
+      </nz-progress>
+    </div>
+  
+    <!-- Habilidades (solo las entrenadas) -->
+    <div class="skills">
+      <h4 nz-typography>Habilidades</h4>
+  
+      <ng-container *ngIf="trainedSkills().length; else noSkills">
+        <ul class="skills-list">
+          <li *ngFor="let s of trainedSkills()">
+            <span class="nm">{{ labelSkill(s) }}</span>
+            <ng-container [ngSwitch]="sheetSig().skills?.[s]">
+              <nz-tag *ngSwitchCase="'expert'" nzColor="gold">Experto</nz-tag>
+              <nz-tag *ngSwitchCase="'prof'">Competente</nz-tag>
+            </ng-container>
+          </li>
+        </ul>
+      </ng-container>
+  
+      <ng-template #noSkills>
+        <div class="muted">Sin habilidades entrenadas.</div>
+      </ng-template>
+    </div>
+  
+    <!-- Rasgos / Equipo / Conjuros (resumen) -->
+    <div class="extras">
+      <div class="block" *ngIf="sheetSig().features">
+        <div class="lbl">Rasgos</div>
+        <div class="txt clamp">{{ sheetSig().features }}</div>
+      </div>
+      <div class="block" *ngIf="sheetSig().inventory">
+        <div class="lbl">Equipo</div>
+        <div class="txt clamp">{{ sheetSig().inventory }}</div>
+      </div>
+      <div class="block" *ngIf="sheetSig().spells">
+        <div class="lbl">Conjuros</div>
+        <div class="txt clamp">{{ sheetSig().spells }}</div>
+      </div>
+    </div>
+  </nz-card>
+  

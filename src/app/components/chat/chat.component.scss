@@ -1,191 +1,102 @@
-/* ========= GRID: izquierda | chat | derecha (ancho adaptable) ========= */
+/* ===== Variables por defecto (si quitas el binding inline) ===== */
+:host{
+  --shell-offset: 72px;
+  --left-w:  clamp(420px, 34vw, 600px);  /* resumen más ancho */
+  --right-w: clamp(400px, 30vw, 560px);  /* tirador más ancho */
+  --cols-gap: 16px;
+}
+
+/* ===== Grid ===== */
 .chat-layout{
-  display:grid;
-  grid-template-columns: 360px minmax(0,1fr) clamp(380px,26vw,520px); /* ← derecha ancha */
-  gap:22px;
-  min-height:calc(100vh - 110px);
+  display: grid;
+  /* Si mantienes el binding inline en el HTML, esta línea no aplica; si lo quitas, sí: */
+  grid-template-columns: var(--left-w) minmax(0,1fr) var(--right-w);
+  gap: var(--cols-gap);
+  align-items: start;
+  min-height: calc(100vh - 110px);
 }
 
-/* En pantallas medianas nos quedamos con dos columnas (la derecha baja) */
-@media (max-width:1200px){
-  .chat-layout{ grid-template-columns: 340px minmax(0,1fr); }
-}
-
-/* ========= SIDE BARS STICKY (con scroll propio) ========= */
+/* Sidebars sticky con scroll propio */
 .sidebar{
-  align-self:start;
   position: sticky;
-  top: var(--shell-offset, 72px);         /* ajusta si tu header mide más/menos */
-  max-height: calc(100dvh - var(--shell-offset,72px) - 16px);
-  overflow: auto;                         /* scroll propio */
-  border-right: 1px solid #eee;
-  padding-right:14px;
-  box-sizing:border-box;
+  top: var(--shell-offset);
+  max-height: calc(100dvh - var(--shell-offset) - 16px);
+  overflow: auto;
+  box-sizing: border-box;
 }
+.sidebar.left  { border-right: 1px solid #eee; padding-right: 14px; }
+.sidebar.right { border-left: 1px solid #eee; padding-left: 14px; }
 
-/* Quita el borde de la izquierda en la derecha */
-.sidebar.right{
-  border-right:0;
-  border-left:1px solid #eee;
-  padding-left:14px;
-  padding-right:0;
-}
-
-/* En móvil/estrecho, las barras dejan de ser sticky y se apilan */
-@media (max-width:920px){
-  .sidebar,
-  .sidebar.right{
-    position: static;
-    max-height: none;
-    overflow: visible;
-    border: 0;
-    padding: 0;
-  }
-}
-
-/* ========= Paneles visuales de las sidebars ========= */
+/* Panel visual */
 .panel{
-  margin:16px 0;
-  padding:14px;
-  border:1px solid #f0f0f0;
-  border-radius:10px;
-  background:#fff;
-  box-sizing:border-box;
+  margin: 16px 0;
+  padding: 14px;
+  border: 1px solid #f0f0f0;
+  border-radius: 10px;
+  background: #fff;
+  box-sizing: border-box;
 }
 
-/* ========= Tracker: tarjeta “Turno activo” más ancha (dos columnas) ========= */
-.tracker2 .active-card{
-  display:grid;
-  grid-template-columns: 1.1fr 0.9fr;    /* izquierda: identidad | derecha: timer/siguientes */
-  gap:14px;
-  align-items:center;
-}
-@media (max-width:1400px){
-  .tracker2 .active-card{ grid-template-columns: 1.2fr 0.8fr; }
-}
-@media (max-width:920px){
-  .tracker2 .active-card{ grid-template-columns: 1fr; }
-}
-.tracker2 .active-card .info .name{ font-size:16px; font-weight:700; }
-.tracker2 .active-card .right .timer nz-progress,
-.tracker2 .active-card .right .timer .time{ width:100%; }
-.tracker2 .active-card .right .chips{ display:flex; flex-wrap:wrap; gap:6px; }
-
-/* ========= Dice Roller en la sidebar derecha: botones anchos ========= */
-.sidebar.right app-dice-roller .types{
-  display:grid !important;
-  grid-template-columns: repeat(4, minmax(84px,1fr));
-  gap:8px;
-}
-.sidebar.right app-dice-roller .types [nz-button]{
-  display:block; width:100%;
-}
-.sidebar.right app-dice-roller .row{
-  display:grid; grid-template-columns:1fr 1fr; gap:10px;
-}
-.sidebar.right app-dice-roller .row .inline nz-input-number{
-  width:100%; max-width:96px;
-}
-
-/* ========= Chat log con scroll independiente (por si aún no lo tenías) ========= */
+/* Chat con scroll independiente */
 .chat{ display:flex; flex-direction:column; min-height:60vh; }
+.chat{
+  min-height: 0;
+  height: calc(100dvh - var(--shell-offset) - 16px);
+  overflow: hidden; /* scrollea .log */
+}
 .log{
-  flex:1;
-  min-height:0;              /* ¡clave para que el overflow funcione dentro del grid/flex! */
-  overflow:auto;
-  padding:12px;
-  border:1px solid #e8e8e8;
-  border-radius:10px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+  border: 1px solid #e8e8e8;
+  border-radius: 10px;
   background:
     radial-gradient(600px 300px at 100% -20%, rgba(149,114,252,.06), transparent 60%),
     radial-gradient(600px 300px at -20% 100%, rgba(16,185,129,.06), transparent 60%),
     #fcfcfd;
   color:#111827;
-}
-/* Altura del header fijo; ajusta si tu navbar mide distinto */
-:root { --shell-offset: 72px; }
 
-/* La columna central del chat: altura limitada + sin scroll propio */
-.chat {
-  display: flex;
-  flex-direction: column;
-
-  /* 👇 clave para que el hijo .log pueda scrollear */
-  min-height: 0;
-
-  /* 👇 limitamos la altura del área de chat a la ventana visible */
-  height: calc(100dvh - var(--shell-offset, 72px) - 16px);
-
-  /* que no haga scroll este contenedor, solo el .log */
-  overflow: hidden;
-}
-
-/* El log sí scrollea */
-.log {
-  flex: 1 1 auto;
-
-  /* 👇 clave dentro de flex/grid */
-  min-height: 0;
-
-  overflow: auto;
-  will-change: transform;       /* suaviza en algunos navegadores */
-  -webkit-overflow-scrolling: touch;
-}
-
-/* Por si un grid impide crecer al ítem central */
-.chat-layout { align-items: start; }
-
-/* Modo móvil: dejamos que la página scrollee y ponemos un tope al log si quieres */
-@media (max-width: 920px) {
-  .chat {
-    height: auto;
-    overflow: visible;
-  }
-  .log {
-    max-height: 50vh;           /* opcional: para que no ocupe todo */
-  }
-}
-
-
-/* --- Log: fondo transparente --- */
-.log {
-  /* el scroll sigue activo por overflow:auto, pero sin fondo */
-  background: transparent !important;
-  border: 1px solid rgba(0,0,0,.08); /* opcional: conserva el borde suave */
-  
-  /* scrollbar moderno (Firefox) */
   scrollbar-width: thin;
-  scrollbar-color: rgba(0,0,0,.28) transparent; /* thumb | track */
+  scrollbar-color: rgba(0,0,0,.28) transparent;
 }
-
-/* WebKit (Chromium/Safari/Edge) */
-.log::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
-}
-.log::-webkit-scrollbar-track {
-  background: transparent;           /* 👈 pista transparente */
-}
+.log::-webkit-scrollbar { width: 10px; height: 10px; }
+.log::-webkit-scrollbar-track { background: transparent; }
 .log::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,.28); /* color del thumb */
+  background-color: rgba(0,0,0,.28);
   border-radius: 8px;
-  border: 2px solid transparent;     /* crea padding visual sin pintar el track */
+  border: 2px solid transparent;
   background-clip: padding-box;
 }
-.log:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,.42); /* un poco más visible al pasar el ratón */
+.log:hover::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,.42); }
+.log::-webkit-scrollbar-corner { background: transparent; }
+
+/* ==== Tiradas: vuelve a 4 columnas al ser más ancho ==== */
+.sidebar.right app-dice-roller .types{
+  display:grid !important;
+  grid-template-columns: repeat(4, minmax(84px,1fr));
+  gap:8px;
 }
-.log::-webkit-scrollbar-corner {
-  background: transparent;
+.sidebar.right app-dice-roller .types [nz-button]{ display:block; width:100%; }
+.sidebar.right app-dice-roller .row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+.sidebar.right app-dice-roller .row .inline nz-input-number{ width:100%; max-width:120px; }
+
+/* ===== Responsivo ===== */
+@media (max-width: 1280px){
+  /* baja un poco los mínimos para que quepa en pantallas medias */
+  :host{
+    --left-w:  clamp(380px, 36vw, 520px);
+    --right-w: clamp(360px, 28vw, 500px);
+  }
+}
+@media (max-width: 920px){
+  .chat-layout{ grid-template-columns: minmax(0,1fr) !important; gap: 14px; }
+  .sidebar.left, .sidebar.right{
+    position: static; max-height: none; overflow: visible; border: 0; padding: 0;
+  }
+  .chat { height: auto; overflow: visible; }
+  .log  { max-height: 50vh; } /* opcional */
 }
 
-/* Modo oscuro (opcional) */
-:root[color-scheme='dark'] .log {
-  scrollbar-color: rgba(255,255,255,.35) transparent;
-}
-:root[color-scheme='dark'] .log::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,.28);
-}
-:root[color-scheme='dark'] .log:hover::-webkit-scrollbar-thumb {
-  background-color: rgba(255,255,255,.45);
-}
+/* Drawer */
+.sheet-drawer .ant-drawer-body{ overflow:auto; }

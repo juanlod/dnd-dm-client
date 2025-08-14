@@ -1,112 +1,193 @@
 <nz-card class="char-card" nzTitle="🧝 Ficha de personaje">
-    <div class="header">
-      <div class="avatar">
-        <nz-avatar [nzSrc]="sheet().image || null" [nzText]="(sheet().name || '?').slice(0,2).toUpperCase()"></nz-avatar>
+  <!-- ============ CABECERA ============ -->
+  <div class="header">
+    <nz-avatar
+      class="avatar-lg"
+      [nzSrc]="sheet().image || null"
+      [nzText]="(sheet().name || '?').slice(0,2).toUpperCase()">
+    </nz-avatar>
+
+    <div class="title">
+      <!-- Nombre grande -->
+      <div class="name-group">
+        <input
+          nz-input
+          class="name-input"
+          [ngModel]="sheet().name"
+          (ngModelChange)="update('name', $event)"
+          placeholder="Nombre del personaje" />
       </div>
-      <div class="title">
-        <!-- NOMBRE -->
-        <input nz-input [ngModel]="sheet().name" (ngModelChange)="update('name', $event)" placeholder="Nombre del personaje" />
-  
-        <div class="meta">
-          <input nz-input [ngModel]="sheet().clazz" (ngModelChange)="update('clazz', $event)" placeholder="Clase" class="small" />
-          <nz-input-number [ngModel]="sheet().level" (ngModelChange)="update('level', $event)" [nzMin]="1" [nzMax]="20"></nz-input-number>
-          <input nz-input [ngModel]="sheet().ancestry" (ngModelChange)="update('ancestry', $event)" placeholder="Linaje/Raza" class="small" />
-          <input nz-input [ngModel]="sheet().alignment" (ngModelChange)="update('alignment', $event)" placeholder="Alineamiento" class="small" />
+
+      <!-- Chips de meta -->
+      <div class="meta-chips">
+        <div class="chip">
+          <span class="chip-label">Clase</span>
+          <input nz-input class="chip-input" [ngModel]="sheet().clazz" (ngModelChange)="update('clazz', $event)" placeholder="Clase" />
+        </div>
+        <div class="chip small">
+          <span class="chip-label">Nivel</span>
+          <nz-input-number class="chip-number" [ngModel]="sheet().level" (ngModelChange)="update('level', $event)" [nzMin]="1" [nzMax]="20"></nz-input-number>
+        </div>
+        <div class="chip">
+          <span class="chip-label">Linaje</span>
+          <input nz-input class="chip-input" [ngModel]="sheet().ancestry" (ngModelChange)="update('ancestry', $event)" placeholder="Linaje/Raza" />
+        </div>
+        <div class="chip">
+          <span class="chip-label">Alineamiento</span>
+          <input nz-input class="chip-input" [ngModel]="sheet().alignment" (ngModelChange)="update('alignment', $event)" placeholder="Alineamiento" />
         </div>
       </div>
     </div>
-  
-    <nz-tabset>
-      <nz-tab nzTitle="Básicos">
-        <div nz-row [nzGutter]="12">
-          <div nz-col nzXs="24" nzSm="24" nzMd="24">
-            <label>Clase de armadura</label>
+  </div>
+
+  <nz-tabset>
+    <!-- ============ TAB BÁSICOS ============ -->
+    <nz-tab nzTitle="Básicos">
+      <!-- Tarjetas de métricas -->
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Clase de armadura</div>
+          <div class="stat-value">
             <nz-input-number [ngModel]="sheet().ac" (ngModelChange)="update('ac', $event)" [nzMin]="1" [nzMax]="30"></nz-input-number>
           </div>
-          <div nz-col nzXs="24" nzSm="24" nzMd="24">
-            <label>HP</label>
-            <div class="hp-row">
-              <nz-input-number [ngModel]="sheet().hp" (ngModelChange)="update('hp', $event)" [nzMin]="0" [nzMax]="999"></nz-input-number>
-              <span>/</span>
-              <nz-input-number [ngModel]="sheet().maxHp" (ngModelChange)="update('maxHp', $event)" [nzMin]="1" [nzMax]="999"></nz-input-number>
-            </div>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Puntos de Golpe</div>
+          <div class="stat-value hp">
+            <nz-input-number [ngModel]="sheet().hp" (ngModelChange)="update('hp', $event)" [nzMin]="0" [nzMax]="999"></nz-input-number>
+            <span class="slash">/</span>
+            <nz-input-number [ngModel]="sheet().maxHp" (ngModelChange)="update('maxHp', $event)" [nzMin]="1" [nzMax]="999"></nz-input-number>
           </div>
-          <div nz-col nzXs="24" nzSm="24" nzMd="24">
-            <label>Velocidad</label>
+        </div>
+
+        <div class="stat">
+          <div class="stat-label">Velocidad</div>
+          <div class="stat-value speed">
             <nz-input-number [ngModel]="sheet().speed" (ngModelChange)="update('speed', $event)" [nzMin]="0" [nzMax]="120"></nz-input-number>
+            <span class="unit">ft</span>
           </div>
         </div>
-  
-        <div class="line"></div>
-  
-        <div nz-row [nzGutter]="12" class="abilities">
-          <div nz-col nzXs="12" nzSm="8" nzMd="8" *ngFor="let k of abilitiesOrder">
-            <div class="abl">
-              <div class="lbl">{{ k.toUpperCase() }}</div>
-              <nz-input-number [ngModel]="sheet().abilities[k]" (ngModelChange)="updateAbility(k, $event)" [nzMin]="1" [nzMax]="30"></nz-input-number>
-              <div class="mod">{{ mod(sheet().abilities[k]) >= 0 ? '+' : '' }}{{ mod(sheet().abilities[k]) }}</div>
-            </div>
-          </div>
-          <div nz-col nzXs="24" nzSm="24" nzMd="24">
-            <label>Competencia (auto seg. nivel si vacío)</label>
-            <nz-input-number [ngModel]="sheet().profBonus" (ngModelChange)="update('profBonus', $event)" [nzMin]="1" [nzMax]="10"></nz-input-number>
-            <div class="muted">Percepción pasiva: <strong>{{ pp() }}</strong></div>
-          </div>
-        </div>
-      </nz-tab>
-  
-      <nz-tab nzTitle="Habilidades">
-        <div class="skills">
-          <div class="hint">Pulsa para alternar: sin → competente → experto.</div>
-          <div class="grid">
-            <button
-              nz-button
-              *ngFor="let s of skills"
-              [nzType]="(sheet().skills?.[s]||'none')==='prof' ? 'default' : (sheet().skills?.[s]==='expert' ? 'primary' : 'default')"
-              [nzGhost]="(sheet().skills?.[s]||'none')==='prof'"
-              (click)="toggleSkill(s)">
-              {{ s }}
-              <nz-tag *ngIf="sheet().skills?.[s]==='prof'">✔︎</nz-tag>
-              <nz-tag *ngIf="sheet().skills?.[s]==='expert'" nzColor="gold">★</nz-tag>
-            </button>
-          </div>
-        </div>
-      </nz-tab>
-  
-      <nz-tab nzTitle="Rasgos">
-        <textarea nz-input rows="6" [ngModel]="sheet().features" (ngModelChange)="update('features', $event)" placeholder="Rasgos/rasgos de clase (uno por línea)"></textarea>
-      </nz-tab>
-  
-      <nz-tab nzTitle="Equipo">
-        <textarea nz-input rows="6" [ngModel]="sheet().inventory" (ngModelChange)="update('inventory', $event)" placeholder="Equipo / inventario"></textarea>
-      </nz-tab>
-  
-      <nz-tab nzTitle="Conjuros">
-        <textarea nz-input rows="6" [ngModel]="sheet().spells" (ngModelChange)="update('spells', $event)" placeholder="Conjuros / slots"></textarea>
-      </nz-tab>
-  
-      <nz-tab nzTitle="Notas">
-        <textarea nz-input rows="6" [ngModel]="sheet().notes" (ngModelChange)="update('notes', $event)" placeholder="Notas varias"></textarea>
-      </nz-tab>
-    </nz-tabset>
-  
-    <div class="actions">
-      <button nz-button (click)="saveLocal()">Guardar local</button>
-      <button nz-button nzType="primary" (click)="share()">Compartir con mesa</button>
-    </div>
-  
-    <div class="party">
-      <h4 nz-typography>Grupo en mesa</h4>
-      <div class="list">
-        <div class="it" *ngFor="let c of party()">
-          <nz-avatar [nzText]="(c.sheet.name||'?').slice(0,2).toUpperCase()" [nzSrc]="c.sheet.image||null"></nz-avatar>
-          <div class="txt">
-            <div class="nm">{{ c.sheet.name }}</div>
-            <div class="meta small">{{ c.sheet.clazz || '—' }} • CA {{ c.sheet.ac }} • HP {{ c.sheet.hp }}/{{ c.sheet.maxHp }}</div>
-          </div>
-        </div>
-        <div class="muted" *ngIf="!party().length">Sin fichas compartidas aún…</div>
       </div>
+
+      <div class="line"></div>
+
+      <!-- Habilidades base -->
+      <div class="abilities">
+        <div class="ability" *ngFor="let k of abilitiesOrder">
+          <div class="ability-head">
+            <div class="ability-name">{{ labelAbility(k) }}</div>
+            <div class="ability-abbr">{{ k.toUpperCase() }}</div>
+          </div>
+          <div class="ability-body">
+            <div class="mod-badge">
+              {{ mod(sheet().abilities[k]) >= 0 ? '+' : '' }}{{ mod(sheet().abilities[k]) }}
+            </div>
+            <nz-input-number
+              class="score-input"
+              [ngModel]="sheet().abilities[k]"
+              (ngModelChange)="updateAbility(k, $event)"
+              [nzMin]="1"
+              [nzMax]="30">
+            </nz-input-number>
+          </div>
+        </div>
+      </div>
+
+      <div class="prof-row">
+        <div class="prof-left">
+          <label>Bonificador de competencia</label>
+          <nz-input-number [ngModel]="sheet().profBonus" (ngModelChange)="update('profBonus', $event)" [nzMin]="1" [nzMax]="10"></nz-input-number>
+        </div>
+        <div class="prof-right">
+          <div class="muted">Percepción pasiva</div>
+          <div class="pp">{{ pp() }}</div>
+        </div>
+      </div>
+
+      <div class="line"></div>
+
+      <!-- Experiencia -->
+      <div class="xp-block">
+        <div class="xp-head">
+          <span class="pill">Nivel <strong>{{ sheet().level }}</strong></span>
+          <span class="pill">PX totales <strong>{{ xp() | number }}</strong></span>
+        </div>
+
+        <nz-progress
+          class="xp-progress"
+          [nzPercent]="xpProgress()"
+          [nzStrokeWidth]="12"
+          [nzStatus]="(xpProgress() === 100 && sheet().level === 20) ? 'success' : 'active'">
+        </nz-progress>
+
+        <div class="xp-actions">
+          <div class="grant">
+            <label>Otorgar PX</label>
+            <nz-input-number [(ngModel)]="xpAward" [nzMin]="0" [nzStep]="25"></nz-input-number>
+            <button nz-button nzType="primary" (click)="grantXp(xpAward)">Otorgar</button>
+          </div>
+          <div class="hint">El nivel sube automáticamente al cruzar el umbral.</div>
+        </div>
+      </div>
+    </nz-tab>
+
+    <!-- ============ TAB HABILIDADES ============ -->
+    <nz-tab nzTitle="Habilidades">
+      <div class="skills">
+        <div class="hint">Pulsa para alternar: sin → competente → experto.</div>
+        <div class="skills-grid">
+          <button
+            nz-button
+            class="skill-btn"
+            *ngFor="let s of skills"
+            [nzType]="(sheet().skills?.[s]||'none')==='prof' ? 'default' : (sheet().skills?.[s]==='expert' ? 'primary' : 'default')"
+            [nzGhost]="(sheet().skills?.[s]||'none')==='prof'"
+            (click)="toggleSkill(s)">
+            <span class="skill-name">{{ labelSkill(s) }}</span>
+            <nz-tag *ngIf="sheet().skills?.[s]==='prof'">✔︎</nz-tag>
+            <nz-tag *ngIf="sheet().skills?.[s]==='expert'" nzColor="gold">★</nz-tag>
+          </button>
+        </div>
+      </div>
+    </nz-tab>
+
+    <!-- ============ OTROS TABS ============ -->
+    <nz-tab nzTitle="Rasgos">
+      <textarea nz-input rows="6" [ngModel]="sheet().features" (ngModelChange)="update('features', $event)" placeholder="Rasgos/rasgos de clase (uno por línea)"></textarea>
+    </nz-tab>
+
+    <nz-tab nzTitle="Equipo">
+      <textarea nz-input rows="6" [ngModel]="sheet().inventory" (ngModelChange)="update('inventory', $event)" placeholder="Equipo / inventario"></textarea>
+    </nz-tab>
+
+    <nz-tab nzTitle="Conjuros">
+      <textarea nz-input rows="6" [ngModel]="sheet().spells" (ngModelChange)="update('spells', $event)" placeholder="Conjuros / slots"></textarea>
+    </nz-tab>
+
+    <nz-tab nzTitle="Notas">
+      <textarea nz-input rows="6" [ngModel]="sheet().notes" (ngModelChange)="update('notes', $event)" placeholder="Notas varias"></textarea>
+    </nz-tab>
+  </nz-tabset>
+
+  <!-- Acciones -->
+  <div class="actions">
+    <button nz-button (click)="saveLocal()">Guardar local</button>
+    <button nz-button nzType="primary" (click)="share()">Compartir con mesa</button>
+  </div>
+
+  <!-- Grupo -->
+  <div class="party">
+    <h4 nz-typography>Grupo en mesa</h4>
+    <div class="list">
+      <div class="it" *ngFor="let c of party()">
+        <nz-avatar [nzText]="(c.sheet.name||'?').slice(0,2).toUpperCase()" [nzSrc]="c.sheet.image||null"></nz-avatar>
+        <div class="txt">
+          <div class="nm">{{ c.sheet.name }}</div>
+          <div class="meta small">{{ c.sheet.clazz || '—' }} • CA {{ c.sheet.ac }} • HP {{ c.sheet.hp }}/{{ c.sheet.maxHp }}</div>
+        </div>
+      </div>
+      <div class="muted" *ngIf="!party().length">Sin fichas compartidas aún…</div>
     </div>
-  </nz-card>
-  
+  </div>
+</nz-card>

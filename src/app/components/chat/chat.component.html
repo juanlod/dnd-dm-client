@@ -1,18 +1,20 @@
-<div class="chat-layout">
-  <!-- Sidebar IZQUIERDA -->
-  <aside class="sidebar left">
-    <h3 nz-typography class="side-title">{{ headerText() }}</h3>
-
+<div
+  class="chat-layout"
+  [style.grid-template-columns]="'460px minmax(0,1fr) 420px'"
+>
+  <!-- ===== IZQUIERDA: Resumen de ficha ===== -->
+  <aside class="sidebar left" aria-label="Resumen de ficha">
     <section class="panel">
-      <app-character-sheet></app-character-sheet>
+      <h3 nz-typography class="side-title">{{ headerText() }}</h3>
+      <app-character-summary></app-character-summary>
     </section>
-
   </aside>
 
-  <!-- CHAT principal -->
-  <section class="chat">
+  <!-- ===== CENTRO: Chat ===== -->
+  <section class="chat" aria-label="Chat">
     <div class="chat-header">
       <div class="header-actions">
+        <button nz-button nzSize="small" (click)="openSheet()">Ficha de personaje</button>
         <button nz-button nzSize="small" (click)="onClearChat()">Vaciar chat</button>
 
         <button nz-button nzSize="small" nzDanger nz-popconfirm
@@ -35,11 +37,7 @@
 
     <div class="log" #log>
       <div class="row" *ngFor="let m of messages" [ngClass]="[m.type, isMine(m) ? 'mine' : '']">
-        <nz-avatar
-          class="avatar"
-          [nzText]="m.type === 'system' ? '!' : initial(m.from)"
-          [ngClass]="colorFor(m.from)">
-        </nz-avatar>
+        <nz-avatar class="avatar" [nzText]="m.type === 'system' ? '!' : initial(m.from)" [ngClass]="colorFor(m.from)"></nz-avatar>
 
         <div class="bubble">
           <div class="meta">
@@ -55,7 +53,6 @@
         </div>
       </div>
 
-      <!-- Indicador de escritura del DM -->
       <div class="row typing" *ngIf="dmTyping">
         <nz-avatar class="avatar c3" nzText="DM"></nz-avatar>
         <div class="bubble typing-bubble">
@@ -78,9 +75,7 @@
       <ng-template #prefix>💬</ng-template>
       <ng-template #suffix><span class="suffix-hint">Enter para enviar</span></ng-template>
 
-      <button nz-button nzType="primary" [disabled]="!messageText.trim()" htmlType="submit">
-        Enviar
-      </button>
+      <button nz-button nzType="primary" [disabled]="!messageText.trim()" htmlType="submit">Enviar</button>
     </form>
 
     <ul class="chips under">
@@ -91,14 +86,24 @@
     </ul>
   </section>
 
-  <!-- Sidebar DERECHA -->
-  <aside class="sidebar right">
-    <section class="panel">
-      <app-initiative-tracker></app-initiative-tracker>
-    </section>
-
+  <!-- ===== DERECHA: Tiradas ===== -->
+  <aside class="sidebar right" aria-label="Tiradas">
     <section class="panel">
       <app-dice-roller></app-dice-roller>
     </section>
   </aside>
 </div>
+
+<!-- Drawer (edición completa de la ficha) -->
+<nz-drawer
+  class="sheet-drawer"
+  [nzVisible]="sheetOpen"
+  nzPlacement="left"
+  [nzWidth]="drawerWidth"
+  nzTitle="🧝 Ficha de personaje"
+  [nzMaskClosable]="true"
+  [nzClosable]="true"
+  (nzOnClose)="closeSheet()"
+>
+  <app-character-sheet *nzDrawerContent></app-character-sheet>
+</nz-drawer>

@@ -22,9 +22,10 @@ import { DiceRollerComponent } from '../dice-roller/dice-roller.component';
 
 // Sanitizador para render “markdown” ligero de forma segura
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
-import { InitiativeTrackerComponent } from '../initiative-tracker/initiative-tracker.component';
 import { CharacterSheetComponent } from '../character-sheet/character-sheet.component';
 import { SocketService } from 'src/app/services/socket.service';
+import { NzDrawerModule } from 'ng-zorro-antd/drawer';
+import { CharacterSummaryComponent } from '../character-summary/character-summary.component';
 
 @Component({
   selector: 'app-chat',
@@ -34,7 +35,7 @@ import { SocketService } from 'src/app/services/socket.service';
     NgFor, NgIf, FormsModule,
     NzInputModule, NzButtonModule, NzTypographyModule,
     NzAvatarModule, NzTagModule, NzPopconfirmModule,
-    DiceRollerComponent, InitiativeTrackerComponent, CharacterSheetComponent
+    DiceRollerComponent, CharacterSheetComponent,NzDrawerModule, CharacterSummaryComponent
   ],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
@@ -70,6 +71,11 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   // Suscripción al stream de mensajes (para liberar en ngOnDestroy)
   private sub?: Subscription;
+  focusSheet = false;
+
+
+  sheetOpen = false;
+  drawerWidth = this.calcDrawerWidth();
 
   // ================= Ciclo de vida =================
   ngOnInit() {
@@ -171,7 +177,7 @@ export class ChatComponent implements OnInit, OnDestroy {
    */
   colorFor(name: string): string {
     const key = 'dnddm.colors';
-    const palette = ['c1','c2','c3','c4','c5','c6'];
+    const palette = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6'];
     try {
       const store = JSON.parse(localStorage.getItem(key) || '{}');
       if (!store[name]) {
@@ -261,7 +267,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     return el.scrollHeight - (el.scrollTop + el.clientHeight) < threshold;
   }
 
-  
+
   onClearChat() {
     // Limpia local + notifica a toda la sala
     this.chat.clearLocal();
@@ -276,4 +282,32 @@ export class ChatComponent implements OnInit, OnDestroy {
   // Solo para recordar que no interceptamos Enter global: el input ya lo maneja
   @HostListener('window:keydown.enter', ['$event'])
   onEnter(_e: KeyboardEvent) { /* el input ya maneja enter */ }
+
+
+  toggleFocusSheet() {
+    this.focusSheet = !this.focusSheet;
+  }
+
+
+
+  // Abrir/cerrar
+  openSheet() { this.sheetOpen = true; }
+  closeSheet() { this.sheetOpen = false; }
+
+
+
+  // Ancho sensible a la ventana (ocupamos ~70% con límites)
+  calcDrawerWidth(): number {
+    const vw = typeof window !== 'undefined' ? window.innerWidth : 1200;
+    const min = 560;   // mínimo cómodo para la ficha
+    const max = 1100;  // máximo para no tapar todo el chat
+    const w = Math.round(vw * 0.7);
+    return Math.max(min, Math.min(max, w));
+  }
+
+  // Recalcular al redimensionar
+  @HostListener('window:resize')
+  onResize() {
+    this.drawerWidth = this.calcDrawerWidth();
+  }
 }
