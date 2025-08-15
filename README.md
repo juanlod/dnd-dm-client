@@ -1,59 +1,93 @@
-# DndDmClient
+# 🧙 D&D DM Online
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.1.6.
+Este proyecto permite jugar a rol estilo Dungeons & Dragons de forma
+online, con un **DM** (Dungeon Master) y jugadores conectados en tiempo
+real.
 
-## Development server
+Incluye: - 🎲 Chat con tiradas de dados - ✨ Efectos visuales de combate
+(daño, curación, crítico...) - 📜 Fichas de personaje compartidas en
+mesa
 
-To start a local development server, run:
+------------------------------------------------------------------------
 
-```bash
-ng serve
+## 🚀 Cómo jugar (jugadores)
+
+1.  Abre la URL del frontend (en GitHub Pages):\
+    👉 **https://TU_USUARIO.github.io/TU_REPO/**
+2.  Escribe tu **nombre** y el **ID de mesa** que te dé el DM.
+3.  ¡Ya estás dentro!
+    -   Usa el chat para hablar.\
+    -   Para tirar dados escribe: `1d20+5`\
+    -   Palabras clave disparan efectos:
+        -   `daño 12`, `damage 12` → 💥 daño\
+        -   `cura 10`, `heal 10` → ✨ curación\
+        -   `crit`, `crítico` → ⚔️ crítico\
+        -   `fallo`, `miss` → ❌ fallo\
+4.  El DM puede mandar mensajes privados con `@dm ...`.
+
+------------------------------------------------------------------------
+
+## 📋 Fichas de personaje
+
+-   Cada jugador puede crear/editar su ficha en la pestaña **Ficha de
+    Personaje**.
+-   La ficha incluye: nombre, clase, nivel, habilidades, inventario...
+-   Botones principales:
+    -   **Guardar local**: guarda en tu navegador.\
+    -   **Compartir con mesa**: la ficha se envía a todos.
+
+👉 Puedes **duplicar** tu ficha desde el botón `Copiar personaje` y
+reiniciar experiencia a 0.
+
+------------------------------------------------------------------------
+
+## 🛠 Instalación (para quien hospeda la partida)
+
+### 1. Backend (Render)
+
+1.  Sube el proyecto a GitHub.
+2.  En [Render](https://render.com) → **New Web Service**.
+    -   Root: `/server`\
+    -   Build Command: `npm ci && npm run build`\
+    -   Start Command: `node dist/index.js`\
+    -   Env vars:
+        -   `NODE_ENV=production`\
+        -   `CLIENT_ORIGINS=https://TU_USUARIO.github.io/TU_REPO`
+
+Render te dará la URL de API, por ejemplo:\
+`https://dnd-backend.onrender.com`
+
+### 2. Frontend (GitHub Pages)
+
+1.  Ajusta `client/src/environments/environment.prod.ts`:
+
+``` ts
+export const environment = {
+  production: true,
+  apiBase: 'https://dnd-backend.onrender.com',
+  wsUrl: 'wss://dnd-backend.onrender.com'
+};
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+2.  Haz build con:
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+``` bash
+ng build --configuration production --base-href /TU_REPO/
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+3.  Sube la carpeta `dist/` a la rama `gh-pages` (o usa GitHub Actions).
 
-```bash
-ng generate --help
-```
+La app quedará en:\
+👉 `https://TU_USUARIO.github.io/TU_REPO/`
 
-## Building
+------------------------------------------------------------------------
 
-To build the project run:
+## 💡 Tips rápidos
 
-```bash
-ng build
-```
+-   Refresca la página si no ves animaciones.
+-   Si Render tarda en responder, es normal: los servicios free
+    "duermen".
+-   Si no conecta el chat → revisa la consola (CORS / URL incorrecta).
+-   Si eres DM, comparte siempre el **ID de mesa** correcto.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+¡Disfruta la aventura! 🐉⚔️
