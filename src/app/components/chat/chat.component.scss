@@ -100,3 +100,15 @@
 
 /* Drawer */
 .sheet-drawer .ant-drawer-body{ overflow:auto; }
+
+
+.chat {
+  position: relative; /* imprescindible */
+}
+
+app-combat-fx-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50; /* por encima del log y el input */
+}

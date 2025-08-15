@@ -1,0 +1,27 @@
+<!-- Capa por encima del chat; cada evento pinta su efecto -->
+<div class="fx"
+     *ngFor="let e of events(); trackBy: trackById"
+     [attr.data-type]="e.type"
+     [style.--x]="(e.x ?? 50) + '%'"
+     [style.--y]="(e.y ?? 50) + '%'"
+     [style.--c]="e.color || ''">
+
+  <!-- Golpe / Crítico / Escudo: onda -->
+  <div class="burst" *ngIf="e.type === 'hit' || e.type === 'crit' || e.type === 'shield'"></div>
+
+  <!-- Miss: estela -->
+  <div class="whoosh" *ngIf="e.type === 'miss'"></div>
+
+  <!-- Conjuro: chispas -->
+  <div class="sparkles" *ngIf="e.type === 'spell'">
+    <i></i><i></i><i></i><i></i>
+  </div>
+
+  <!-- Daño / Curación: número flotante -->
+  <div class="float" *ngIf="e.type === 'damage' || e.type === 'heal'">
+    <span class="amt" [class.heal]="e.type === 'heal'">{{ e.amount ?? '' }}</span>
+  </div>
+
+  <!-- Crítico: flash -->
+  <div class="flash" *ngIf="e.type === 'crit'"></div>
+</div>

@@ -1,12 +1,12 @@
 import { Component, computed, inject } from '@angular/core';
-import { NgFor, NgIf, DecimalPipe } from '@angular/common';
+import { NgFor, NgIf, DecimalPipe, CommonModule } from '@angular/common';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
-
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { CharacterService } from '../../services/character.service';
 import { CharacterSheet, SkillName } from '../../models/character';
 
@@ -25,7 +25,7 @@ const MAX_LEVEL = 20;
   standalone: true,
   imports: [
     // Angular
-    NgFor, NgIf, DecimalPipe,
+    NgFor, NgIf, DecimalPipe, NzSwitchModule, CommonModule,
     // NG-ZORRO
     NzCardModule, NzAvatarModule, NzTagModule, NzTypographyModule, NzGridModule, NzProgressModule
   ],

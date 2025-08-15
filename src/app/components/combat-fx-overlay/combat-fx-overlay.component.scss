@@ -1,0 +1,116 @@
+:host{
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 3;
+  }
+  
+  /* Sacudida breve para críticos */
+  :host.shake{ animation: fx-shake .5s ease both; }
+  @keyframes fx-shake{
+    0%{ transform: translate(0,0); }
+    20%{ transform: translate(-2px, 1px); }
+    40%{ transform: translate(3px, -1px); }
+    60%{ transform: translate(-2px, 2px); }
+    80%{ transform: translate(2px, 0); }
+    100%{ transform: translate(0,0); }
+  }
+  
+  /* Cada evento posiciona su efecto con CSS vars */
+  .fx{
+    position: absolute;
+    left: var(--x, 50%);
+    top:  var(--y, 50%);
+    transform: translate(-50%, -50%);
+    --c: var(--c, #ef4444);
+  }
+  
+  /* Onda de impacto / crítico / escudo */
+  .burst{
+    position: absolute;
+    width: 180px; height: 180px; border-radius: 50%;
+    transform: translate(-50%, -50%);
+    opacity: .45;
+    animation: fx-burst .7s ease-out forwards;
+    background: radial-gradient(circle, var(--c) 0%, transparent 60%);
+    filter: drop-shadow(0 0 8px color-mix(in oklab, var(--c) 70%, black));
+  }
+  @keyframes fx-burst{
+    0%   { transform: translate(-50%, -50%) scale(.2); opacity:.7; }
+    80%  { opacity:.25; }
+    100% { transform: translate(-50%, -50%) scale(1.2); opacity:0; }
+  }
+  /* Variante escudo (anillo más tenue) */
+  .fx[data-type="shield"] .burst{
+    background: radial-gradient(closest-side, color-mix(in oklab, var(--c) 30%, transparent), transparent 60%);
+    box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--c) 80%, white);
+    animation-duration: .9s;
+  }
+  
+  /* Estela de fallo */
+  .whoosh{
+    position: absolute;
+    width: 220px; height: 2px;
+    transform: translate(-50%,-50%);
+    background: linear-gradient(90deg, transparent, var(--c), transparent);
+    animation: fx-whoosh .6s ease-out forwards;
+    opacity: .8;
+  }
+  @keyframes fx-whoosh{
+    from { transform: translate(-210px, -50%); opacity:.8; }
+    to   { transform: translate( 210px, -50%); opacity:0;  }
+  }
+  
+  /* Chispas de conjuro */
+  .sparkles{
+    position: absolute; transform: translate(-50%,-50%);
+  }
+  .sparkles i{
+    position: absolute; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--c);
+    box-shadow: 0 0 6px color-mix(in oklab, var(--c) 70%, white);
+    animation: fx-spark 900ms ease-out forwards;
+  }
+  .sparkles i:nth-child(1){ transform: translate(-6px,-8px); }
+  .sparkles i:nth-child(2){ transform: translate( 8px,-2px); }
+  .sparkles i:nth-child(3){ transform: translate(-2px, 6px); }
+  .sparkles i:nth-child(4){ transform: translate(10px, 10px); }
+  @keyframes fx-spark{
+    0%{ opacity:0; transform: translate(0,0) scale(.6); }
+    30%{ opacity:1; }
+    100%{ opacity:0; transform: translate( -8px, -16px ) scale(1.1); }
+  }
+  
+  /* Números flotantes (daño/curación) */
+  .float{
+    position: absolute;
+    transform: translate(-50%,-50%);
+    animation: fx-float 900ms ease-out forwards;
+  }
+  .amt{
+    font: 800 clamp(18px, 2.6cqi, 24px)/1 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans";
+    color: var(--c);
+    text-shadow: 0 1px 0 rgba(0,0,0,.2), 0 0 8px color-mix(in oklab, var(--c) 30%, white);
+    letter-spacing: .5px;
+  }
+  .amt.heal{ color: #10b981; }
+  @keyframes fx-float{
+    0%{   opacity:0; transform: translate(-50%,-20%); }
+    30%{  opacity:1; }
+    100%{ opacity:0; transform: translate(-50%,-120%); }
+  }
+  
+  /* Flash de crítico */
+  .flash{
+    position: absolute; inset: 0;
+    background: radial-gradient(circle at var(--x) var(--y), rgba(245,158,11,.35), transparent 60%);
+    animation: fx-flash .4s ease-out forwards;
+  }
+  @keyframes fx-flash{
+    0%{ opacity: 0; }
+    25%{ opacity: 1; }
+    100%{ opacity: 0; }
+  }
+  
+  /* Ajustes responsive automáticos: el overlay hereda el tamaño del contenedor (.chat) */
+  

@@ -69,7 +69,6 @@
           name="msg"
           placeholder="Escribe tu acción… (usa @dm para preguntar al DM)"
           autocomplete="off"
-          (keyup.enter)="send()"
         />
       </nz-input-group>
       <ng-template #prefix>💬</ng-template>
@@ -84,6 +83,8 @@
       <li><button nz-button nzSize="small" (click)="insert('investigo la sala')">Investigar</button></li>
       <li><button nz-button nzSize="small" (click)="insert('me acerco en sigilo')">Sigilo</button></li>
     </ul>
+
+    <app-combat-fx-overlay></app-combat-fx-overlay>
   </section>
 
   <!-- ===== DERECHA: Tiradas ===== -->
