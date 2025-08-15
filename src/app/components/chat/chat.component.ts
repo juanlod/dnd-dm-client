@@ -87,6 +87,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   // ================= Ciclo de vida =================
   ngOnInit() {
+
+    console.log('entra')
+
     this.sub = this.chat.messages$.subscribe(ms => {
       const el = this.logRef?.nativeElement;
       const nearBottom = this.isNearBottom(el);

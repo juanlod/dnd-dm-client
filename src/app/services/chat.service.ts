@@ -126,6 +126,7 @@ export class ChatService {
    * Inicia sesión en una sala (guarda en localStorage y solicita "join" al servidor).
    */
   login(name: string, roomId: string) {
+    console.log('llega')
     if (!name?.trim() || !roomId?.trim()) return;
     this.saveLogin(name.trim(), roomId.trim());
     if (this.socket.isConnected()) this.socket.join(roomId.trim(), name.trim());

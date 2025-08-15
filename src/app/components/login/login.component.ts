@@ -11,6 +11,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NgIf } from '@angular/common';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -27,6 +28,7 @@ import { NgIf } from '@angular/common';
 export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private chat = inject(ChatService);
+  private router = inject(Router);
 
   loading = false;
   generalError = '';
@@ -71,23 +73,30 @@ export class LoginComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
+  
     const { name, roomId, remember } = this.form.getRawValue();
     this.loading = true;
-
-    // Guardar/limpiar recordatorio
-    if (remember) {
-      localStorage.setItem('dnddm.login', JSON.stringify({ name, roomId }));
-    } else {
-      localStorage.removeItem('dnddm.login');
+  
+    // Guarda/limpia recordatorio (no bloquea)
+    try {
+      if (remember) localStorage.setItem('dnddm.login', JSON.stringify({ name, roomId }));
+      else localStorage.removeItem('dnddm.login');
+    } catch {}
+  
+    try {
+      // Cualquier error aquí NO debe impedir navegar
+      this.chat.login(name, roomId);
+    } catch (e: any) {
+      console.warn('[Login] chat.login error:', e);
+      this.generalError = e?.message || 'No se pudo iniciar la sesión de chat aún.';
+    } finally {
+      // NAVEGA SIEMPRE (ajusta la ruta si tu path real no es /chat)
+      this.router.navigate(['/mesa'], { replaceUrl: true });
+      this.loading = false;
     }
-
-    // El ChatService se encarga de navegar a /mesa al recibir 'joined'
-    this.chat.login(name, roomId);
-
-    // Pequeño spinner visual
-    setTimeout(() => (this.loading = false), 500);
   }
-
+  
+  
   generateRoomId(): void {
     // Generador simple de slug legible
     const adjectives = ['bosque', 'abismo', 'bruma', 'roble', 'runa', 'forja', 'draco', 'ébano'];

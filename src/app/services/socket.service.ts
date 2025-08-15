@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 import { io, Socket } from 'socket.io-client';
+import { environment } from 'src/environments/environment';
 
 export interface JoinedPayload { roomId: string; nickname: string; role?: 'dm' | 'player'; }
 export interface ChatPayload { from: string; text: string; ts: number; }
@@ -25,7 +26,7 @@ export interface CombatUpdate {
 export class SocketService {
   private socket?: Socket;
   private connected = false;
-  private readonly url = 'http://localhost:3000';
+  private readonly url = environment.apiBase;
 
   joined$ = new Subject<JoinedPayload>();
   system$ = new Subject<string>();
