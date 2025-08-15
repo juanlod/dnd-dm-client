@@ -125,10 +125,19 @@
           <div class="grant">
             <label>Otorgar PX</label>
             <nz-input-number [(ngModel)]="xpAward" [nzMin]="0" [nzStep]="25"></nz-input-number>
-            <button nz-button nzType="primary" (click)="grantXp(xpAward)">Otorgar</button>
+            <button nz-button nzType="primary" (click)="grantXp(xpAward)" [disabled]="!isPositive(xpAward)">Otorgar</button>
+            <button nz-button nzDanger (click)="revokeLastXp()" [disabled]="!canRevoke()">Deshacer último</button>
           </div>
-          <div class="hint">El nivel sube automáticamente al cruzar el umbral.</div>
+        
+          <div class="revoke">
+            <label>Quitar PX</label>
+            <nz-input-number [(ngModel)]="xpRevoke" [nzMin]="0" [nzStep]="25"></nz-input-number>
+            <button nz-button (click)="removeXp(xpRevoke)" [disabled]="!isPositive(xpRevoke)">Quitar</button>
+          </div>
+        
+          <div class="hint">El nivel se sincroniza automáticamente al cambiar el total de PX.</div>
         </div>
+        
       </div>
     </nz-tab>
 
@@ -173,8 +182,10 @@
   <!-- Acciones -->
   <div class="actions">
     <button nz-button (click)="saveLocal()">Guardar local</button>
+    <button nz-button nzType="default" (click)="copyAsNew()">Copiar como nuevo (sin PX)</button>
     <button nz-button nzType="primary" (click)="share()">Compartir con mesa</button>
   </div>
+  
 
   <!-- Grupo -->
   <div class="party">
