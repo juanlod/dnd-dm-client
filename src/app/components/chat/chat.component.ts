@@ -88,7 +88,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   // ================= Ciclo de vida =================
   ngOnInit() {
 
-    console.log('entra')
+    
 
     this.sub = this.chat.messages$.subscribe(ms => {
       const el = this.logRef?.nativeElement;
@@ -108,6 +108,12 @@ export class ChatComponent implements OnInit, OnDestroy {
         if (nearBottom || fromMe) this.scrollToBottom();
       });
     });
+
+    this.socket.on('dm', this.onDmIncoming);
+
+  // 👇 sincroniza cabecera inmediatamente con la identidad ya fijada por ChatService.login
+  this.nameSig.set(this.chat.name);
+  this.roomSig.set(this.chat.roomId);
 
     this.socket.on('dm', this.onDmIncoming);
   }

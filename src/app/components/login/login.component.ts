@@ -39,7 +39,7 @@ export class LoginComponent implements OnInit {
         Validators.required,
         Validators.minLength(2),
         Validators.maxLength(24),
-        Validators.pattern(/^[\p{L}\p{N}\- _]+$/u) // letras, números, guion, subrayado y espacio
+        Validators.pattern(/^[\p{L}\p{N}\- _]+$/u)
       ]
     }),
     roomId: this.fb.nonNullable.control('', {
@@ -47,14 +47,13 @@ export class LoginComponent implements OnInit {
         Validators.required,
         Validators.minLength(3),
         Validators.maxLength(40),
-        Validators.pattern(/^[a-z0-9\-]+$/) // slug: minúsculas, números y guion
+        Validators.pattern(/^[a-z0-9\-]+$/)
       ]
     }),
     remember: this.fb.nonNullable.control(true)
   });
 
   ngOnInit(): void {
-    // Cargar última sesión si existe
     const saved = localStorage.getItem('dnddm.login');
     if (saved) {
       try {
@@ -73,34 +72,29 @@ export class LoginComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-  
+
     const { name, roomId, remember } = this.form.getRawValue();
     this.loading = true;
-  
-    // Guarda/limpia recordatorio (no bloquea)
+
     try {
       if (remember) localStorage.setItem('dnddm.login', JSON.stringify({ name, roomId }));
       else localStorage.removeItem('dnddm.login');
     } catch {}
-  
+
     try {
-      // Cualquier error aquí NO debe impedir navegar
-      this.chat.login(name, roomId);
+      this.chat.login(name, roomId); // fija identidad y lanza join
     } catch (e: any) {
       console.warn('[Login] chat.login error:', e);
       this.generalError = e?.message || 'No se pudo iniciar la sesión de chat aún.';
     } finally {
-      // NAVEGA SIEMPRE (ajusta la ruta si tu path real no es /chat)
-      this.router.navigate(['/mesa'], { replaceUrl: true });
+      this.router.navigate(['/mesa'], { replaceUrl: true }); // o '/chat' si esa es tu ruta
       this.loading = false;
     }
   }
-  
-  
+
   generateRoomId(): void {
-    // Generador simple de slug legible
-    const adjectives = ['bosque', 'abismo', 'bruma', 'roble', 'runa', 'forja', 'draco', 'ébano'];
-    const nums = Math.floor(Math.random() * 90) + 10; // 10-99
+    const adjectives = ['bosque', 'abismo', 'bruma', 'roble', 'runa', 'forja', 'draco', 'ebano']; // sin tilde
+    const nums = Math.floor(Math.random() * 90) + 10;
     const word = adjectives[Math.floor(Math.random() * adjectives.length)];
     const slug = `${word}-${nums}`;
     this.form.patchValue({ roomId: slug });
