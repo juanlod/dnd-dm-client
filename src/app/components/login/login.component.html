@@ -1,23 +1,24 @@
-<div class="auth-wrapper rpg-bg">
-  <nz-card class="auth-card rpg-card" [nzBordered]="false">
+<div class="auth-wrap glass-bg">
+  <div class="glass-card">
+    <!-- Cabecera: escudo + título con Uncial Antiqua -->
     <div class="brand">
       <div class="crest">
         <div class="crest-ring"></div>
         <div class="crest-gem">🧙‍♂️</div>
       </div>
       <div class="titles">
-        <h2 nz-typography class="game-title">Crónicas de la Mesa</h2>
-        <p nz-typography class="subtitle">Comparte el mismo ID de campaña con tu grupo.</p>
+        <h1 class="title">Crónicas de la Mesa</h1>
+        <p class="subtitle">Comparte el mismo ID de campaña con tu grupo.</p>
       </div>
     </div>
 
     <div class="divider">
-      <span class="ornament">✦</span>
+      <span class="orn">✦</span>
       <span class="rule"></span>
-      <span class="ornament">✦</span>
+      <span class="orn">✦</span>
     </div>
 
-    <!-- Layout vertical -->
+    <!-- Formulario vertical NG-ZORRO -->
     <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="submit()" class="form">
       <!-- Nombre -->
       <nz-form-item>
@@ -32,7 +33,7 @@
               autocomplete="off"
             />
           </nz-input-group>
-          <ng-template #namePrefix><span class="prefix">👤</span></ng-template>
+          <ng-template #namePrefix>👤</ng-template>
           <ng-template #nameErrors>
             <ng-container *ngIf="f.name.hasError('required')">El nombre es obligatorio.</ng-container>
             <ng-container *ngIf="f.name.hasError('minlength')">Mínimo 2 caracteres.</ng-container>
@@ -42,7 +43,7 @@
         </nz-form-control>
       </nz-form-item>
 
-      <!-- Room ID -->
+      <!-- ID de campaña -->
       <nz-form-item>
         <nz-form-label [nzRequired]="true" nzFor="roomId">ID de campaña</nz-form-label>
         <nz-form-control [nzValidateStatus]="f.roomId" [nzErrorTip]="roomErrors">
@@ -51,11 +52,11 @@
               nz-input
               id="roomId"
               formControlName="roomId"
-              placeholder="ej: bosque-01"
+              placeholder="ej: bosque-37"
               autocomplete="off"
             />
           </nz-input-group>
-          <ng-template #roomPrefix><span class="prefix">🏷️</span></ng-template>
+          <ng-template #roomPrefix>🏷️</ng-template>
           <ng-template #roomSuffix>
             <button nz-button nzSize="small" type="button" class="btn-ghost" (click)="generateRoomId()">Generar</button>
           </ng-template>
@@ -68,12 +69,10 @@
         </nz-form-control>
       </nz-form-item>
 
-      <!-- Recordarme -->
-      <div class="row remember">
+      <div class="remember">
         <label nz-checkbox formControlName="remember">Recordarme en este equipo</label>
       </div>
 
-      <!-- Acciones -->
       <div class="actions">
         <button
           nz-button
@@ -97,5 +96,5 @@
       <div class="general-error" *ngIf="generalError">{{ generalError }}</div>
       <div class="footer-hint">Usa el mismo ID de campaña que tu grupo para entrar en la misma mesa.</div>
     </form>
-  </nz-card>
+  </div>
 </div>
