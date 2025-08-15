@@ -1,23 +1,38 @@
-<div class="auth-wrapper">
-  <nz-card class="auth-card" [nzBordered]="false">
+<div class="auth-wrapper rpg-bg">
+  <nz-card class="auth-card rpg-card" [nzBordered]="false">
     <div class="brand">
-      <div class="logo">🧙‍♂️</div>
+      <div class="crest">
+        <div class="crest-ring"></div>
+        <div class="crest-gem">🧙‍♂️</div>
+      </div>
       <div class="titles">
-        <h2 nz-typography class="title">Entrar a la mesa</h2>
+        <h2 nz-typography class="game-title">Crónicas de la Mesa</h2>
         <p nz-typography class="subtitle">Comparte el mismo ID de campaña con tu grupo.</p>
       </div>
     </div>
 
-    <!-- 👇 Forzamos layout vertical -->
+    <div class="divider">
+      <span class="ornament">✦</span>
+      <span class="rule"></span>
+      <span class="ornament">✦</span>
+    </div>
+
+    <!-- Layout vertical -->
     <form nz-form nzLayout="vertical" [formGroup]="form" (ngSubmit)="submit()" class="form">
       <!-- Nombre -->
       <nz-form-item>
         <nz-form-label [nzRequired]="true" nzFor="name">Tu nombre</nz-form-label>
         <nz-form-control [nzValidateStatus]="f.name" [nzErrorTip]="nameErrors">
           <nz-input-group [nzPrefix]="namePrefix">
-            <input nz-input id="name" formControlName="name" placeholder="Ej: Lirien" autocomplete="off" />
+            <input
+              nz-input
+              id="name"
+              formControlName="name"
+              placeholder="Ej: Lirien"
+              autocomplete="off"
+            />
           </nz-input-group>
-          <ng-template #namePrefix>👤</ng-template>
+          <ng-template #namePrefix><span class="prefix">👤</span></ng-template>
           <ng-template #nameErrors>
             <ng-container *ngIf="f.name.hasError('required')">El nombre es obligatorio.</ng-container>
             <ng-container *ngIf="f.name.hasError('minlength')">Mínimo 2 caracteres.</ng-container>
@@ -32,11 +47,17 @@
         <nz-form-label [nzRequired]="true" nzFor="roomId">ID de campaña</nz-form-label>
         <nz-form-control [nzValidateStatus]="f.roomId" [nzErrorTip]="roomErrors">
           <nz-input-group [nzPrefix]="roomPrefix" [nzSuffix]="roomSuffix">
-            <input nz-input id="roomId" formControlName="roomId" placeholder="ej: bosque-01" autocomplete="off" />
+            <input
+              nz-input
+              id="roomId"
+              formControlName="roomId"
+              placeholder="ej: bosque-01"
+              autocomplete="off"
+            />
           </nz-input-group>
-          <ng-template #roomPrefix>🏷️</ng-template>
+          <ng-template #roomPrefix><span class="prefix">🏷️</span></ng-template>
           <ng-template #roomSuffix>
-            <button nz-button nzSize="small" type="button" (click)="generateRoomId()">Generar</button>
+            <button nz-button nzSize="small" type="button" class="btn-ghost" (click)="generateRoomId()">Generar</button>
           </ng-template>
           <ng-template #roomErrors>
             <ng-container *ngIf="f.roomId.hasError('required')">El ID es obligatorio.</ng-container>
@@ -54,15 +75,27 @@
 
       <!-- Acciones -->
       <div class="actions">
-        <button nz-button nzType="primary" [nzLoading]="loading" [disabled]="form.invalid || loading" htmlType="submit">
-          Entrar
+        <button
+          nz-button
+          nzType="primary"
+          class="btn-primary-glow"
+          [nzLoading]="loading"
+          [disabled]="form.invalid || loading"
+          htmlType="submit">
+          <span class="btn-ico">🗝️</span> Entrar
         </button>
-        <button nz-button nzType="default" type="button" (click)="form.reset({ name: '', roomId: '', remember: true })">
+
+        <button
+          nz-button
+          type="button"
+          class="btn-ghost"
+          (click)="form.reset({ name: '', roomId: '', remember: true })">
           Limpiar
         </button>
       </div>
 
       <div class="general-error" *ngIf="generalError">{{ generalError }}</div>
+      <div class="footer-hint">Usa el mismo ID de campaña que tu grupo para entrar en la misma mesa.</div>
     </form>
   </nz-card>
 </div>

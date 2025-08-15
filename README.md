@@ -13,7 +13,7 @@ mesa
 ## 🚀 Cómo jugar (jugadores)
 
 1.  Abre la URL del frontend (en GitHub Pages):\
-    👉 **https://TU_USUARIO.github.io/TU_REPO/**
+    👉 **https://juanlod.github.io/dnd-dm-client**
 2.  Escribe tu **nombre** y el **ID de mesa** que te dé el DM.
 3.  ¡Ya estás dentro!
     -   Usa el chat para hablar.\

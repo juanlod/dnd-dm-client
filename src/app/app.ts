@@ -12,4 +12,7 @@ import { NzTypographyModule } from 'ng-zorro-antd/typography';
 })
 export class App {
   protected readonly title = signal('dnd-dm-client');
+
+  // 👇 Agrega esto
+  readonly currentYear = new Date().getFullYear();
 }

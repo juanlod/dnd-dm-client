@@ -1,23 +1,16 @@
-<nz-layout class="app-shell">
-  <nz-header class="app-header">
-    <div class="container nav">
-      <a class="brand" routerLink="/">
-        <span class="logo" aria-hidden="true">🧙‍♂️</span>
-        <span class="title">Dungeons & Dragons — Mesa online</span>
-        <!-- <span class="badge">MVP</span> -->
-      </a>
-
-      <div class="spacer"></div>
-
-      <!-- Acciones (opcional: añade rutas si quieres) -->
-      <!-- <a class="nav-link" routerLink="/login">Login</a> -->
-      <!-- <a class="nav-link" href="https://tu-link" target="_blank" rel="noreferrer">Docs</a> -->
+<nz-layout class="shell">
+  <nz-header class="topbar">
+    <div class="brand">
+      <span class="logo">🧙‍♂️</span>
+      <span class="title">Crónicas de la Mesa</span>
     </div>
   </nz-header>
 
-  <nz-content>
-    <div class="container">
-      <router-outlet></router-outlet>
-    </div>
+  <nz-content class="content">
+    <!-- 👇 Aquí se pintan /#/login y /#/mesa -->
+    <router-outlet></router-outlet>
   </nz-content>
+
+  <!-- 👇 Usa la propiedad expuesta desde el componente -->
+  <nz-footer class="foot">© {{ currentYear }} — Tu mesa</nz-footer>
 </nz-layout>
