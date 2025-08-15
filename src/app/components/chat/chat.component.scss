@@ -1,114 +1,159 @@
-/* ===== Variables por defecto (si quitas el binding inline) ===== */
-:host{
+:host {
   --shell-offset: 72px;
-  --left-w:  clamp(420px, 34vw, 600px);  /* resumen más ancho */
-  --right-w: clamp(400px, 30vw, 560px);  /* tirador más ancho */
+  --left-w: clamp(420px, 34vw, 600px);
+  --right-w: clamp(400px, 30vw, 560px);
   --cols-gap: 16px;
+
+  --ink: #f9fafb;
+  --muted: #d1d5db;
+  --bg: #111827;
+  --gem: #8b5cf6;
+  --emerald: #10b981;
+  --gold: #d4af37;
 }
 
-/* ===== Grid ===== */
-.chat-layout{
+/* ===== Grid principal ===== */
+.chat-layout {
   display: grid;
-  /* Si mantienes el binding inline en el HTML, esta línea no aplica; si lo quitas, sí: */
-  grid-template-columns: var(--left-w) minmax(0,1fr) var(--right-w);
+  grid-template-columns: var(--left-w) minmax(0, 1fr) var(--right-w);
   gap: var(--cols-gap);
   align-items: start;
   min-height: calc(100vh - 110px);
+  color: var(--ink);
 }
 
-/* Sidebars sticky con scroll propio */
-.sidebar{
+/* ===== Sidebars sticky ===== */
+.sidebar {
   position: sticky;
   top: var(--shell-offset);
   max-height: calc(100dvh - var(--shell-offset) - 16px);
   overflow: auto;
   box-sizing: border-box;
 }
-.sidebar.left  { border-right: 1px solid #eee; padding-right: 14px; }
-.sidebar.right { border-left: 1px solid #eee; padding-left: 14px; }
 
-/* Panel visual */
-.panel{
+.sidebar.left {
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  padding-right: 14px;
+}
+
+.sidebar.right {
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  padding-left: 14px;
+}
+
+/* ===== Paneles visuales estilo glass ===== */
+.panel {
   margin: 16px 0;
   padding: 14px;
-  border: 1px solid #f0f0f0;
-  border-radius: 10px;
-  background: #fff;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)), rgba(255,255,255,.04);
+  backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 12px 28px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.15);
   box-sizing: border-box;
+  color: var(--ink);
 }
 
-/* Chat con scroll independiente */
-.chat{ display:flex; flex-direction:column; min-height:60vh; }
-.chat{
+/* ===== Chat con scroll independiente ===== */
+.chat {
+  display: flex;
+  flex-direction: column;
+  min-height: 60vh;
   min-height: 0;
   height: calc(100dvh - var(--shell-offset) - 16px);
-  overflow: hidden; /* scrollea .log */
+  overflow: hidden;
+  position: relative;
 }
-.log{
+
+/* Log del chat */
+.log {
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  padding: 12px;
-  border: 1px solid #e8e8e8;
-  border-radius: 10px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
   background:
-    radial-gradient(600px 300px at 100% -20%, rgba(149,114,252,.06), transparent 60%),
-    radial-gradient(600px 300px at -20% 100%, rgba(16,185,129,.06), transparent 60%),
-    #fcfcfd;
-  color:#111827;
+    radial-gradient(600px 300px at 100% -20%, rgba(139,92,246,.08), transparent 60%),
+    radial-gradient(600px 300px at -20% 100%, rgba(16,185,129,.08), transparent 60%),
+    rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(4px);
+  color: var(--ink);
 
   scrollbar-width: thin;
-  scrollbar-color: rgba(0,0,0,.28) transparent;
+  scrollbar-color: rgba(255,255,255,.25) transparent;
 }
+
 .log::-webkit-scrollbar { width: 10px; height: 10px; }
 .log::-webkit-scrollbar-track { background: transparent; }
 .log::-webkit-scrollbar-thumb {
-  background-color: rgba(0,0,0,.28);
+  background-color: rgba(255,255,255,.25);
   border-radius: 8px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
-.log:hover::-webkit-scrollbar-thumb { background-color: rgba(0,0,0,.42); }
+.log:hover::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,.4); }
 .log::-webkit-scrollbar-corner { background: transparent; }
 
-/* ==== Tiradas: vuelve a 4 columnas al ser más ancho ==== */
-.sidebar.right app-dice-roller .types{
-  display:grid !important;
-  grid-template-columns: repeat(4, minmax(84px,1fr));
-  gap:8px;
+/* ===== Tiradas con rejilla ===== */
+.sidebar.right app-dice-roller .types {
+  display: grid !important;
+  grid-template-columns: repeat(4, minmax(84px, 1fr));
+  gap: 8px;
 }
-.sidebar.right app-dice-roller .types [nz-button]{ display:block; width:100%; }
-.sidebar.right app-dice-roller .row{ display:grid; grid-template-columns:1fr 1fr; gap:10px; }
-.sidebar.right app-dice-roller .row .inline nz-input-number{ width:100%; max-width:120px; }
+.sidebar.right app-dice-roller .types [nz-button] {
+  display: block;
+  width: 100%;
+}
+.sidebar.right app-dice-roller .row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.sidebar.right app-dice-roller .row .inline nz-input-number {
+  width: 100%;
+  max-width: 120px;
+}
 
 /* ===== Responsivo ===== */
-@media (max-width: 1280px){
-  /* baja un poco los mínimos para que quepa en pantallas medias */
-  :host{
-    --left-w:  clamp(380px, 36vw, 520px);
+@media (max-width: 1280px) {
+  :host {
+    --left-w: clamp(380px, 36vw, 520px);
     --right-w: clamp(360px, 28vw, 500px);
   }
 }
-@media (max-width: 920px){
-  .chat-layout{ grid-template-columns: minmax(0,1fr) !important; gap: 14px; }
-  .sidebar.left, .sidebar.right{
-    position: static; max-height: none; overflow: visible; border: 0; padding: 0;
+
+@media (max-width: 920px) {
+  .chat-layout {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 14px;
   }
-  .chat { height: auto; overflow: visible; }
-  .log  { max-height: 50vh; } /* opcional */
+  .sidebar.left,
+  .sidebar.right {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    border: 0;
+    padding: 0;
+  }
+  .chat {
+    height: auto;
+    overflow: visible;
+  }
+  .log {
+    max-height: 50vh;
+  }
 }
 
 /* Drawer */
-.sheet-drawer .ant-drawer-body{ overflow:auto; }
-
-
-.chat {
-  position: relative; /* imprescindible */
+.sheet-drawer .ant-drawer-body {
+  overflow: auto;
 }
 
+/* Overlay de efectos */
 app-combat-fx-overlay {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 50; /* por encima del log y el input */
+  z-index: 50;
 }
