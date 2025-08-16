@@ -1,6 +1,43 @@
-<nz-card class="char-card" nzTitle="🧝 Ficha de personaje">
-  <!-- ============ CABECERA ============ -->
-  <div class="header">
+
+<div class="char-card" nzTitle="🧝 Fichas de personaje">
+
+  <!-- ============ SELECTOR DE PERSONAJE (multi) ============ -->
+  <div class="multi-header">
+    <div class="cards-row">
+      <button
+        nz-button
+        class="char-pill new-btn"
+        *ngFor="let d of sheets()"
+        [nzType]="d.id === selectedId() ? 'primary' : 'default'"
+        (click)="select(d.id)">
+        <span class="pill-name" [title]="displayName(d)">{{ displayName(d) }}</span>
+      </button>
+
+      <button nz-button nzType="dashed" class="char-pill add-btn" (click)="newChar()" style="margin-left: 10px;"> 
+        <i nz-icon></i>
+        <span>Nueva ficha</span>
+      </button>
+    </div>
+
+    <div class="header-actions">
+      <button nz-button (click)="duplicateChar()"><i nz-icon nzType="copy"></i> Duplicar</button>
+      <button
+        nz-button
+        nzDanger
+        [disabled]="!selectedId()"
+        (click)="deleteChar(selectedId()!)">
+        <i nz-icon nzType="delete"></i> Eliminar
+      </button>
+      <button nz-button (click)="saveLocal()"><i nz-icon></i> Guardar</button>
+      <button nz-button nzType="primary" (click)="share()"><i nz-icon ></i> Compartir</button>
+    </div>
+  </div>
+
+  <div class="line"></div>
+
+  <!-- ============ CABECERA DE LA FICHA SELECCIONADA ============ -->
+  <div class="header" *ngIf="selectedId(); else emptyState">
+
     <nz-avatar
       class="avatar-lg"
       [nzSrc]="sheet().image || null"
@@ -40,7 +77,7 @@
     </div>
   </div>
 
-  <nz-tabset>
+  <nz-tabset *ngIf="selectedId()">
     <!-- ============ TAB BÁSICOS ============ -->
     <nz-tab nzTitle="Básicos">
       <!-- Tarjetas de métricas -->
@@ -179,13 +216,12 @@
     </nz-tab>
   </nz-tabset>
 
-  <!-- Acciones -->
-  <div class="actions">
+  <!-- Acciones (mantengo por coherencia visual, aunque ya están arriba) -->
+  <div class="actions" *ngIf="selectedId()">
     <button nz-button (click)="saveLocal()">Guardar local</button>
-    <button nz-button nzType="default" (click)="copyAsNew()">Copiar como nuevo (sin PX)</button>
+    <button nz-button nzType="default" (click)="duplicateChar()">Copiar como nuevo (sin PX)</button>
     <button nz-button nzType="primary" (click)="share()">Compartir con mesa</button>
   </div>
-  
 
   <!-- Grupo -->
   <div class="party">
@@ -201,4 +237,13 @@
       <div class="muted" *ngIf="!party().length">Sin fichas compartidas aún…</div>
     </div>
   </div>
-</nz-card>
+
+</div>
+
+<ng-template #emptyState>
+  <div class="empty">
+    <p>No hay fichas. Crea una nueva para empezar.</p>
+    <button nz-button nzType="primary" (click)="newChar()"><i nz-icon ></i> Nueva ficha</button>
+  </div>
+</ng-template>
+

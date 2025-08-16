@@ -1,5 +1,5 @@
 import { DecimalPipe, NgFor, NgIf } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, Signal, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CharacterSheet, SkillName } from '../../models/character';
 import { CharacterService } from '../../services/character.service';
@@ -16,6 +16,10 @@ import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzTypographyModule } from 'ng-zorro-antd/typography';
+import { NzDropDownModule } from 'ng-zorro-antd/dropdown';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { CharacterDoc } from '../../services/character.service';
 
 /** Abreviaturas de habilidades base (D&D) */
 type AbilityKey = 'str' | 'dex' | 'con' | 'int' | 'wis' | 'cha';
@@ -25,26 +29,8 @@ type SheetWithXp = CharacterSheet & { xp?: number };
 
 /** Tabla de XP acumulada por nivel (D&D 5e) */
 const XP_TABLE: Record<number, number> = {
-  1: 0,
-  2: 300,
-  3: 900,
-  4: 2700,
-  5: 6500,
-  6: 14000,
-  7: 23000,
-  8: 34000,
-  9: 48000,
-  10: 64000,
-  11: 85000,
-  12: 100000,
-  13: 120000,
-  14: 140000,
-  15: 165000,
-  16: 195000,
-  17: 225000,
-  18: 265000,
-  19: 305000,
-  20: 355000
+  1: 0, 2: 300, 3: 900, 4: 2700, 5: 6500, 6: 14000, 7: 23000, 8: 34000, 9: 48000, 10: 64000,
+  11: 85000, 12: 100000, 13: 120000, 14: 140000, 15: 165000, 16: 195000, 17: 225000, 18: 265000, 19: 305000, 20: 355000
 };
 const MAX_LEVEL = 20;
 
@@ -55,7 +41,8 @@ const MAX_LEVEL = 20;
     FormsModule, NgFor, NgIf,
     NzCardModule, NzFormModule, NzInputModule, NzInputNumberModule,
     NzButtonModule, NzGridModule, NzTabsModule, NzAvatarModule,
-    NzTagModule, NzTypographyModule, NzProgressModule, DecimalPipe
+    NzTagModule, NzTypographyModule, NzProgressModule, DecimalPipe,
+    NzDropDownModule, NzIconModule, NzToolTipModule,
   ],
   templateUrl: './character-sheet.component.html',
   styleUrl: './character-sheet.component.scss',
@@ -65,8 +52,15 @@ export class CharacterSheetComponent {
   private svc = inject(CharacterService);
   private msg = inject(NzMessageService);
 
-  sheet = this.svc.sheet;         // signal<CharacterSheet>
-  party = this.svc.roomChars;     // signal<RoomChar[]>
+  // Multi-ficha
+  sheets = this.svc.sheets;              // signal<CharacterDoc[]>
+  selectedId = this.svc.selectedId;      // signal<string|null>
+
+  // Ficha seleccionada (compatibilidad con tu código existente)
+  sheet: Signal<CharacterSheet> = this.svc.sheet;
+
+  // Grupo/mesa
+  party = this.svc.roomChars;
 
   // ===== I18N de etiquetas =====
   readonly abilitiesOrder: readonly AbilityKey[] = ['str', 'dex', 'con', 'int', 'wis', 'cha'] as const;
@@ -105,18 +99,10 @@ export class CharacterSheetComponent {
     Survival: 'Supervivencia'
   };
 
-  // ===== NUEVO: estado auxiliar para quitar/undo =====
+  // ===== Estado auxiliar XP/undo =====
   xpRevoke: number = 0;
-  private lastAwards: number[] = []; // pila LIFO de otorgamientos para "Deshacer"
+  private lastAwards: number[] = [];
 
-
-
-  labelAbility(k: AbilityKey): string { return this.abilityLabels[k] ?? k; }
-  labelSkill(k: SkillName): string { return this.skillLabels[k] ?? k; }
-  // Utilidad UI
-  isPositive(v: any): boolean { return Number.isFinite(Number(v)) && Number(v) > 0; }
-  canRevoke(): boolean { return this.lastAwards.length > 0; }
-  
   // ===== Derivados existentes =====
   prof = computed(() => this.sheet().profBonus ?? Math.max(2, Math.ceil(this.sheet().level / 4) + 1));
   mod = (v: number) => Math.floor((Number(v) - 10) / 2);
@@ -131,9 +117,46 @@ export class CharacterSheetComponent {
 
   // ===== Experiencia y subida de nivel =====
   xp = computed<number>(() => (this.sheet() as SheetWithXp).xp ?? 0);
-  xpAward: number = 0; // ngModel del otorgador de XP
+  xpAward: number = 0; // ngModel del otorgador de PX
 
-  /** Devuelve el nivel correspondiente a un total de XP */
+  // ===== Utilidad UI =====
+  labelAbility(k: AbilityKey): string { return this.abilityLabels[k] ?? k; }
+  labelSkill(k: SkillName): string { return this.skillLabels[k] ?? k; }
+  isPositive(v: any): boolean { return Number.isFinite(Number(v)) && Number(v) > 0; }
+  canRevoke(): boolean { return this.lastAwards.length > 0; }
+
+  // ===== CRUD multi-ficha =====
+  select(id: string) { this.svc.select(id); this.lastAwards = []; }
+  newChar() { this.svc.createNew(); this.msg.success('Nueva ficha creada.'); }
+  duplicateChar() {
+    const id = this.svc.duplicateSelected();
+    if (id) this.msg.success('Copia creada (Nivel 1, HP al máximo).');
+  }
+  deleteChar(id: string) {
+    const curr = this.selectedId();
+    this.svc.delete(id);
+    if (curr === id) this.lastAwards = [];
+    this.msg.info('Ficha eliminada.');
+  }
+
+  // ===== Persistencia / compartir =====
+  saveLocal() { this.svc.saveLocal(); this.msg.success('Todas las fichas guardadas localmente.'); }
+  share() { this.svc.shareToTable(); this.msg.success('Ficha compartida con la mesa.'); this.svc.requestAll(); }
+
+  // ===== Mutadores (vía servicio) =====
+  update<K extends keyof CharacterSheet>(key: K, val: CharacterSheet[K]) {
+    this.svc.patchSelected({ [key]: val } as Partial<CharacterSheet>);
+  }
+  updateAbility(k: AbilityKey, val: number) {
+    this.svc.updateSelected(s => ({ ...s, abilities: { ...s.abilities, [k]: val } as any }));
+  }
+  toggleSkill(k: SkillName) {
+    const curr = this.sheet().skills?.[k] ?? 'none';
+    const next = curr === 'none' ? 'prof' : curr === 'prof' ? 'expert' : 'none';
+    this.svc.updateSelected(s => ({ ...s, skills: { ...(s.skills || {}), [k]: next } }));
+  }
+
+  // ===== PX/Nivel =====
   private levelFromXp(totalXp: number): number {
     let lvl = 1;
     for (let i = 2; i <= MAX_LEVEL; i++) {
@@ -142,13 +165,11 @@ export class CharacterSheetComponent {
     return lvl;
   }
 
-  /** Umbral de XP para el siguiente nivel; null si ya está al máximo */
   nextLevelThreshold(lvl: number): number | null {
     const next = lvl + 1;
     return next <= MAX_LEVEL ? XP_TABLE[next] : null;
   }
 
-  /** Progreso (0–100) hacia el siguiente nivel basado en XP actual */
   xpProgress(): number {
     const xp = this.xp();
     const lvl = this.levelFromXp(xp);
@@ -159,79 +180,59 @@ export class CharacterSheetComponent {
     return Math.max(0, Math.min(100, pct));
   }
 
-  /** Establecer XP directamente */
   setXp(newXp: number) {
     const sanitized = Math.max(0, Math.floor(Number(newXp) || 0));
     const beforeLevel = this.sheet().level;
-    // Actualiza XP
-    this.sheet.update(s => ({ ...(s as SheetWithXp), xp: sanitized } as CharacterSheet));
-    // Sincroniza nivel si corresponde
+    this.svc.updateSelected(s => ({ ...(s as SheetWithXp), xp: sanitized } as CharacterSheet));
     this.syncLevelWithXp(beforeLevel);
   }
 
-  /** Añadir XP (otorgar) + registrar para poder deshacer */
   grantXp(amount: number) {
     const add = Math.floor(Number(amount) || 0);
-    if (add <= 0) {
-      this.msg.warning('Cantidad de PX inválida.');
-      return;
-    }
+    if (add <= 0) { this.msg.warning('Cantidad de PX inválida.'); return; }
     const curr = this.xp();
     const nextTotal = Math.max(0, curr + add);
     const beforeLevel = this.sheet().level;
 
-    // Guarda en la pila de deshacer
     this.lastAwards.push(add);
-
-    this.sheet.update(s => ({ ...(s as SheetWithXp), xp: nextTotal } as CharacterSheet));
+    this.svc.updateSelected(s => ({ ...(s as SheetWithXp), xp: nextTotal } as CharacterSheet));
     this.msg.success(`Se otorgaron ${add} PX. Total: ${nextTotal.toLocaleString()}.`);
     this.xpAward = 0;
 
     this.syncLevelWithXp(beforeLevel);
   }
 
-  /** Quitar (restar) PX manualmente */
   removeXp(amount: number) {
     const sub = Math.floor(Number(amount) || 0);
-    if (sub <= 0) {
-      this.msg.warning('Cantidad de PX a quitar inválida.');
-      return;
-    }
+    if (sub <= 0) { this.msg.warning('Cantidad de PX a quitar inválida.'); return; }
     const curr = this.xp();
     const nextTotal = Math.max(0, curr - sub);
     const beforeLevel = this.sheet().level;
 
-    this.sheet.update(s => ({ ...(s as SheetWithXp), xp: nextTotal } as CharacterSheet));
+    this.svc.updateSelected(s => ({ ...(s as SheetWithXp), xp: nextTotal } as CharacterSheet));
     this.msg.info(`Se quitaron ${sub} PX. Total: ${nextTotal.toLocaleString()}.`);
     this.xpRevoke = 0;
 
     this.syncLevelWithXp(beforeLevel);
   }
 
-  /** Deshacer el último "Otorgar PX" (LIFO) */
   revokeLastXp() {
     const last = this.lastAwards.pop();
-    if (!last) {
-      this.msg.warning('No hay otorgamientos para deshacer.');
-      return;
-    }
+    if (!last) { this.msg.warning('No hay otorgamientos para deshacer.'); return; }
     const curr = this.xp();
     const nextTotal = Math.max(0, curr - last);
     const beforeLevel = this.sheet().level;
 
-    this.sheet.update(s => ({ ...(s as SheetWithXp), xp: nextTotal } as CharacterSheet));
+    this.svc.updateSelected(s => ({ ...(s as SheetWithXp), xp: nextTotal } as CharacterSheet));
     this.msg.info(`Deshecho: -${last} PX. Total: ${nextTotal.toLocaleString()}.`);
 
     this.syncLevelWithXp(beforeLevel);
   }
 
-
-
-  /** Recalcula nivel a partir de PX y avisa si sube o baja */
   private syncLevelWithXp(previousLevel: number) {
     const recalculated = this.levelFromXp(this.xp());
     if (recalculated !== previousLevel) {
-      this.sheet.update(s => ({ ...s, level: recalculated }));
+      this.svc.patchSelected({ level: recalculated });
       if (recalculated > previousLevel) {
         this.msg.success(`¡Subes a nivel ${recalculated}!`);
       } else {
@@ -240,48 +241,9 @@ export class CharacterSheetComponent {
     }
   }
 
-
-  // ===== Mutadores seguros existentes =====
-  update<K extends keyof CharacterSheet>(key: K, val: CharacterSheet[K]) {
-    this.sheet.update(s => ({ ...s, [key]: val }));
+  // ===== Helpers de UI para cabecera de selección =====
+  displayName(doc: CharacterDoc): string {
+    const s = doc.sheet;
+    return s.name?.trim() || 'Sin nombre';
   }
-  updateAbility(k: AbilityKey, val: number) {
-    this.sheet.update(s => ({ ...s, abilities: { ...s.abilities, [k]: val } }));
-  }
-  toggleSkill(k: SkillName) {
-    const curr = this.sheet().skills?.[k] ?? 'none';
-    const next = curr === 'none' ? 'prof' : curr === 'prof' ? 'expert' : 'none';
-    this.sheet.update(s => ({ ...s, skills: { ...(s.skills || {}), [k]: next } }));
-  }
-
-  // ===== Acciones =====
-  saveLocal() { this.msg.success('Ficha guardada localmente.'); }
-  share() { this.svc.shareToTable(); this.msg.success('Ficha compartida con la mesa.'); this.svc.requestAll(); }
-
-  /** Copia la ficha actual como NUEVA, reseteando PX y nivel */
-  copyAsNew() {
-    const src = this.sheet() as SheetWithXp;
-    const clone: CharacterSheet = {
-      ...src,
-      name: src.name ? `${src.name} (copia)` : 'Nuevo personaje',
-      // XP “borrada” y nivel re-calculado a 1
-      level: 1,
-      // Mantén atributos, equipo, etc. tal cual; resetea PX y sincroniza HP si quieres
-      // (opcional) al copiar, pon HP = MaxHP para empezar “fresco”
-      hp: Math.max(1, Number(src.maxHp) || 1),
-      // Quita el campo xp opcional en el clon (o pon a 0 si lo quieres visible)
-      ...((): Partial<SheetWithXp> => ({ xp: 0 }))()
-    };
-
-    // Si tu CharacterService tiene un método para “crear”/“agregar” una nueva ficha, úsalo aquí.
-    // Como fallback, reemplazamos la actual por la copia (local), y pedimos guardar.
-    this.sheet.update(() => clone);
-    this.lastAwards = []; // limpia historial de otorgamientos para el nuevo
-
-    this.msg.success('Se creó una copia sin PX (Nivel 1). Puedes renombrarla y guardar.');
-    // (opcional) this.saveLocal();
-  }
-
-
-
 }

@@ -24,7 +24,7 @@
             "index": "src/index.html",
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
-            "baseHref": "/dnd-dm-client",
+            "baseHref": "/",
             "assets": [
               "src/favicon.ico",
               "src/assets"

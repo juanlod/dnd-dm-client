@@ -244,4 +244,205 @@
   background: #fff;
 }
 .party .it .nm { font-weight: 700; }
-.party .it .small { color: #8c8c8c; }
+.party .it .small { color: #9ca3af; }
+
+
+/* ===== Inputs oscuros ===== */
+input,
+textarea,
+.ant-input,
+.ant-input-number,
+.ant-input-number-input,
+.ant-select-selector {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+input::placeholder,
+textarea::placeholder,
+.ant-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+input:focus,
+textarea:focus,
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-number-focused,
+.ant-select-focused .ant-select-selector {
+  border-color: rgba(59, 130, 246, 0.6) !important; /* azul */
+  box-shadow: 0 0 6px rgba(59, 130, 246, 0.4);
+  outline: none;
+}
+
+/* Input number */
+.ant-input-number-handler-wrap {
+  background: rgba(255, 255, 255, 0.08);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+.ant-input-number-handler {
+  color: #fff;
+}
+.ant-input-number-handler:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+/* Select y dropdown */
+.ant-select-dropdown {
+  background: rgba(31, 41, 55, 0.95) !important;
+  color: #fff !important;
+  backdrop-filter: blur(8px);
+}
+.ant-select-item {
+  color: #fff;
+}
+.ant-select-item-option-selected {
+  background: rgba(59, 130, 246, 0.3) !important;
+}
+
+
+/* ===== Botones oscuros ===== */
+.ant-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+  border-radius: 10px;
+  backdrop-filter: blur(6px);
+  transition: all 0.2s ease;
+}
+
+.ant-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+/* Botón primario */
+.ant-btn-primary {
+  background: rgba(59, 130, 246, 0.8) !important; /* azul translúcido */
+  border: 1px solid rgba(59, 130, 246, 0.9) !important;
+  color: #fff !important;
+}
+
+.ant-btn-primary:hover {
+  background: rgba(59, 130, 246, 1) !important;
+  border-color: rgba(59, 130, 246, 1) !important;
+}
+
+/* Botón danger */
+.ant-btn-dangerous {
+  background: rgba(220, 38, 38, 0.8) !important; /* rojo translúcido */
+  border: 1px solid rgba(220, 38, 38, 0.9) !important;
+  color: #fff !important;
+}
+
+.ant-btn-dangerous:hover {
+  background: rgba(220, 38, 38, 1) !important;
+  border-color: rgba(220, 38, 38, 1) !important;
+}
+
+/* Botón ghost (transparente con borde) */
+.ant-btn-ghost {
+  background: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+.ant-btn-ghost:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+}
+/* ===== Barra de progreso glass oscuro ===== */
+::ng-deep .ant-progress-bg {
+  background: linear-gradient(90deg, #2563eb, #3b82f6) !important; 
+  border-radius: 999px !important;
+  box-shadow: 0 0 12px rgba(59,130,246,0.6);
+}
+
+::ng-deep .ant-progress-inner {
+  background: rgba(255, 255, 255, 0.08) !important; 
+  border-radius: 999px !important;
+  backdrop-filter: blur(6px);
+}
+
+::ng-deep .ant-progress-text {
+  color: #ffffff !important;
+  font-weight: 600;
+}
+
+
+::ng-deep .ant-drawer-header, ::ng-deep .ant-drawer-body {
+  // background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)), rgba(17, 24, 39, 0.55) !important;
+background: var(--bg) !important; 
+}
+
+::ng-deep .ant-drawer-title {
+  color: #f3f4f6 !important; /* texto claro */
+}
+::ng-deep.ant-drawer-close {
+  color: #f3f4f6 !important; /* texto claro */
+}
+
+h4, ::ng-deep .ant-tabs-tab-btn, .prof-left {
+  color: #f3f4f6 !important; /* texto claro */
+}
+
+
+
+/* Contenedor de los botones */
+.header-actions {
+  display: flex;
+  gap: 0.75rem;  /* espacio uniforme entre botones */
+  margin-top: 1rem;
+  flex-wrap: wrap; /* para que en pantallas pequeñas bajen a otra línea */
+}
+
+/* Estilos comunes */
+.btn-action {
+  min-width: 110px;    /* todos iguales */
+  justify-content: center;
+}
+
+/* Si quieres colores o separaciones distintas */
+.btn-action.duplicate {
+  background: #f0f5ff;
+  border-color: #91d5ff;
+}
+
+.btn-action.delete {
+  margin-left: auto; /* empuja este botón a la derecha */
+}
+
+.btn-action.save {
+  background: #fafafa;
+}
+
+.btn-action.share {
+  font-weight: 600;
+}
+/* Botón dentro del selector de fichas */
+.add-btn {
+  border-style: dashed;
+  color: #1890ff;
+  background: #fafafa;
+
+  &:hover {
+    background: #e6f7ff;
+    border-color: #40a9ff;
+  }
+}
+
+/* Botón de estado vacío */
+.new-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  margin-top: 1rem;
+
+  i[nz-icon] {
+    font-size: 16px;
+  }
+}
