@@ -37,9 +37,14 @@ export class DiceRollerComponent {
   onDieClick(f: number, ev?: MouseEvent) {
     const onlySelect = !!(ev && (ev.shiftKey || ev.ctrlKey || ev.metaKey));
     this.faces.set(f);
-    }
 
-    
+    // si no está en modo "solo seleccionar", tiramos directamente
+    if (!onlySelect) {
+      this.roll();
+    }
+  }
+
+
   incQty(d: number) { this.qty.set(Math.max(1, Math.min(50, Math.round((this.qty() || 1) + d)))); }
   incMod(d: number) { this.mod.set(Math.max(-999, Math.min(999, Math.round((this.mod() || 0) + d)))); }
   setPreset(q: number, f: number, m = 0) { this.qty.set(q); this.faces.set(f); this.mod.set(m); this.roll(); }

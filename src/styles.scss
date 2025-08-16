@@ -1,5 +1,16 @@
 @import 'ng-zorro-antd/ng-zorro-antd.min.css';
 
+/* ===== Paleta RPG (misma que login/splash) ===== */
+:host {
+  --ink:    #f9fafb;
+  --muted:  #d1d5db;
+  --bg:     #111827;
+  --gem:    #8b5cf6;
+  --emerald:#10b981;
+  --rose:   #ef4444;
+  --gold:   #d4af37;
+}
+
 
 /* Ajustes opcionales por si tienes cabecera fija */
 :root { --shell-offset: 72px; }           /* ya lo usas en tu app */
@@ -60,7 +71,7 @@ html, body { height: 100%; margin: 0; }
     box-sizing: border-box;
   }
   
-  .side-title { margin-top: 4px; }
+  .side-title { margin-top: 4px; color: #f9fafb !important }
   
   /* Paneles en la sidebar */
   .panel {
@@ -136,7 +147,7 @@ html, body { height: 100%; margin: 0; }
     display:flex; align-items:center; gap:6px; margin-bottom:4px;
     font-size:12px; color:#6b7280;
   }
-  .meta .from { font-weight:700; color:#111827; }
+  .meta .from { font-weight:700; color:var(--ink); }
   .meta .time { margin-left:auto; }
   
   .text { white-space: pre-wrap; line-height:1.45; }
@@ -244,4 +255,13 @@ html.app-scale-80 {
     width: 125%;
     height: 125%;
   }
+
 }
+
+.ant-card-head-title, .prof-right {
+  color: var(--ink) !important;
+}
+
+
+
+

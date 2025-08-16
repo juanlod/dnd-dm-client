@@ -41,7 +41,7 @@
 
         <div class="bubble">
           <div class="meta">
-            <span class="from" *ngIf="m.type !== 'system'">{{ m.from }}</span>
+            <span class="from" *ngIf="m.type !== 'system' && m.type !== 'dm'">{{ m.from }}</span>
             <nz-tag *ngIf="m.type === 'dm'" nzColor="success">DM</nz-tag>
             <span class="time">{{ time(m.ts) }}</span>
           </div>

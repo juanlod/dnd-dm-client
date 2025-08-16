@@ -157,3 +157,136 @@ app-combat-fx-overlay {
   pointer-events: none;
   z-index: 50;
 }
+
+
+
+/* ===== Botones del header ===== */
+.header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.header-actions button[nz-button] {
+  border-radius: 999px;
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--ink);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.25);
+  transition: all 0.2s ease;
+}
+
+.header-actions button[nz-button]:hover {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: rgba(139, 92, 246, 0.35);
+  color: var(--ink);
+}
+
+/* Variante Danger (Reiniciar / Salir) */
+.header-actions button[nzDanger] {
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.35);
+  color: #fca5a5;
+}
+.header-actions button[nzDanger]:hover {
+  background: rgba(220, 38, 38, 0.25);
+  border-color: rgba(220, 38, 38, 0.5);
+  color: #fecaca;
+}
+
+
+/* ===== Input Composer ===== */
+.composer {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+
+.composer nz-input-group {
+  flex: 1 1 auto;
+}
+
+/* ===== Input Composer oscuro ===== */
+.composer input[nz-input] {
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.08) !important; /* fondo oscuro translúcido */
+  color: var(--ink); /* texto blanco */
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+.composer input[nz-input]::placeholder {
+  color: var(--muted); /* gris claro */
+  opacity: 0.8;
+}
+
+.composer input[nz-input]:focus {
+  border-color: var(--gem);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+  outline: none;
+}
+
+/* Botón Enviar */
+.composer button[nzType="primary"] {
+  border-radius: 999px;
+  padding: 6px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(135deg, var(--gem), var(--emerald));
+  border: none;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(0,0,0,.35);
+  transition: all 0.25s ease;
+}
+
+.composer button[nzType="primary"]:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 6px 16px rgba(0,0,0,.45);
+}
+
+.composer .suffix-hint {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+
+
+
+/* ===== Input del chat: oscuro con texto blanco ===== */
+:host ::ng-deep .composer .ant-input-affix-wrapper {
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08);
+  color: var(--ink);
+  backdrop-filter: blur(4px);
+  transition: all .2s ease;
+}
+
+/* El propio <input> */
+:host ::ng-deep .composer .ant-input-affix-wrapper .ant-input {
+  background: transparent !important;
+  color: var(--ink) !important;      /* blanco */
+}
+
+/* Placeholder claro */
+:host ::ng-deep .composer .ant-input-affix-wrapper .ant-input::placeholder {
+  color: var(--muted);
+  opacity: .85;
+}
+
+/* Focus violeta */
+:host ::ng-deep .composer .ant-input-affix-wrapper-focused {
+  border-color: var(--gem) !important;
+  box-shadow: 0 0 0 2px rgba(139,92,246,.25) !important;
+}
+
+

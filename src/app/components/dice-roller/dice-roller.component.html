@@ -1,10 +1,19 @@
 <div class="roller">
   <div class="hdr">
     <h4 nz-typography class="ttl">🎲 Tiradas</h4>
-    <nz-tag nzColor="blue" nz-tooltip nzTooltipTitle="Click en un dado = tirar. Shift/Ctrl/⌘ = solo seleccionar.">
+    <nz-tag 
+      nzColor="blue" 
+      nz-tooltip 
+      nzTooltipTitle="Click en un dado = tirar directamente. Shift/Ctrl/⌘ = solo seleccionar dado.">
       {{ notation() }}
     </nz-tag>
   </div>
+
+  <!-- Instrucciones -->
+  <p class="hint">
+    👉 Haz <strong>click en un dado</strong> para tirar.<br>
+    👉 Usa <kbd>Shift</kbd>/<kbd>Ctrl</kbd>/<kbd>⌘</kbd> + click para <em>solo seleccionar</em>.
+  </p>
 
   <!-- Dados: click = tirar; Shift/Ctrl/⌘ = seleccionar -->
   <div class="types">
@@ -58,8 +67,9 @@
     <button nz-button nzSize="small" (click)="setPreset(1,100,0)">🎲 1d100</button>
   </div>
 
+
   <!-- Botón extra (opcional) por si alguien prefiere revisar antes de lanzar) -->
   <div class="actions">
-    <button nz-button (click)="roll()">Tirar</button>
+    <button nz-button (click)="roll()">🎲 Tirar</button>
   </div>
 </div>
