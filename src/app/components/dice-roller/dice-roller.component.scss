@@ -142,3 +142,28 @@ nz-input-number:focus-within {
   font-family: monospace;
   font-size: 11px;
 }
+
+
+/* ===== Campos numéricos (oscuro estilo glass) ===== */
+:host ::ng-deep .ant-input-number {
+  background: rgba(255, 255, 255, 0.06) !important; /* fondo oscuro translúcido */
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 8px;
+  padding: 4px 6px;
+  color: var(--ink) !important; /* texto claro */
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+
+/* Texto interno */
+:host ::ng-deep .ant-input-number-input {
+  background: transparent !important;
+  color: var(--ink) !important;  /* blanco */
+}
+
+/* Hover / Focus */
+:host ::ng-deep .ant-input-number:hover,
+:host ::ng-deep .ant-input-number-focused {
+  border-color: var(--gem) !important;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25) !important;
+}

@@ -1,16 +1,13 @@
-import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+// character.service.ts (completo y corregido)
+import { Injectable, Signal, computed, signal } from '@angular/core';
 import { CharacterSheet } from '../models/character';
-import { SocketService } from './socket.service';
 
-/** Envoltorio de documento: id estable + ficha */
 export interface CharacterDoc {
   id: string;
   sheet: CharacterSheet;
 }
 
-/** Util simple para ids sin dependencias externas */
 function uid(prefix = 'c'): string {
-  // c-YYYYMMDDHHmmss-XXXX (bastante único para este caso)
   const pad = (n: number) => n.toString().padStart(2, '0');
   const d = new Date();
   const ts = [
@@ -25,7 +22,7 @@ function uid(prefix = 'c'): string {
   return `${prefix}-${ts}-${rand}`;
 }
 
-/** Ficha vacía por defecto */
+/** Defaults seguros según tu modelo */
 function defaultSheet(): CharacterSheet {
   return {
     name: 'Nuevo personaje',
@@ -35,72 +32,119 @@ function defaultSheet(): CharacterSheet {
     alignment: '',
     image: '',
     ac: 10,
-    hp: 8,
-    maxHp: 8,
+    hp: 10,
+    maxHp: 10,
     speed: 30,
     profBonus: 2,
     abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 } as any,
     skills: {},
     senses: {},
-    /** IMPORTANTE: array, no string */
-    features: [],
+    features: [],     // OJO: arrays si tu modelo los define así
     inventory: '',
     spells: '',
     notes: ''
   } as CharacterSheet;
 }
 
+/** Migra/normaliza un CharacterDoc que viene de localStorage */
+function normalizeDoc(d: Partial<CharacterDoc>): CharacterDoc {
+  const base = defaultSheet();
+  const s: any = { ...base, ...(d?.sheet ?? {}) };
+
+  // Normalizaciones por si cambió el esquema entre versiones
+  if (Array.isArray(s.features) === false) s.features = (s.features ?? '').toString().split('\n').filter(Boolean);
+  if (s.skills == null || typeof s.skills !== 'object') s.skills = {};
+  if (s.senses == null || typeof s.senses !== 'object') s.senses = {};
+  if (s.abilities == null || typeof s.abilities !== 'object') s.abilities = base.abilities;
+
+  // Números razonables
+  s.level = Math.max(1, Number(s.level || 1));
+  s.ac = Math.max(1, Number(s.ac || 10));
+  s.maxHp = Math.max(1, Number(s.maxHp || 8));
+  s.hp = Math.max(0, Math.min(Number(s.hp || 8), s.maxHp));
+  s.speed = Math.max(0, Number(s.speed || 30));
+  s.profBonus = Math.max(1, Number(s.profBonus || 2));
+
+  return {
+    id: d?.id || uid(),
+    sheet: s as CharacterSheet
+  };
+}
+
+/** Lectura única desde localStorage sin tocar señales */
+function readFromStorage(key: string): { docs: CharacterDoc[]; selectedId: string | null } {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return { docs: [], selectedId: null };
+    const parsed = JSON.parse(raw) as { docs?: Partial<CharacterDoc>[]; selectedId?: string | null };
+
+    const docs = (parsed.docs ?? []).map(normalizeDoc).filter(Boolean);
+    const selectedId = parsed.selectedId && docs.some(d => d.id === parsed.selectedId)
+      ? parsed.selectedId!
+      : (docs[0]?.id ?? null);
+
+    return { docs, selectedId };
+  } catch {
+    // Si hay datos corruptos, devolvemos vacío
+    return { docs: [], selectedId: null };
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
   private STORAGE_KEY = 'rpg.multichar.v1';
-  private socket = inject(SocketService);
-  /** Colección de fichas */
-  readonly sheets = signal<CharacterDoc[]>(this.loadFromStorage());
 
-  /** Ficha seleccionada (id) */
-  readonly selectedId = signal<string | null>(this.sheets().length ? this.sheets()[0].id : null);
+  // 1) Leemos una sola vez del storage, sin tocar aún señales
+  private readonly _initial = (() => {
+    const { docs, selectedId } = readFromStorage(this.STORAGE_KEY);
+    // Si no había nada, creamos uno por defecto
+    if (!docs.length) {
+      const first: CharacterDoc = { id: uid(), sheet: defaultSheet() };
+      return { docs: [first], selectedId: first.id };
+    }
+    return { docs, selectedId: selectedId ?? docs[0].id };
+  })();
 
-  /** Acceso a la ficha seleccionada como Signal<CharacterSheet> (para compatibilidad con tu componente) */
+  // 2) Creamos señales con esos valores iniciales (sin efectos secundarios)
+  readonly sheets = signal<CharacterDoc[]>(this._initial.docs);
+  readonly selectedId = signal<string | null>(this._initial.selectedId);
+
+  // 3) Hoja seleccionada como Signal<CharacterSheet>
   readonly sheet: Signal<CharacterSheet> = computed(() => {
     const sel = this.selectedId();
     const doc = this.sheets().find(d => d.id === sel);
+    // Nunca devolvemos undefined para no romper el binding
     return (doc?.sheet ?? defaultSheet());
   });
 
-  /** Reemplaza por completo la ficha seleccionada */
+  // ===== API =====
   updateSelected(mut: (s: CharacterSheet) => CharacterSheet) {
     const id = this.selectedId();
     if (!id) return;
-    this.sheets.update(arr =>
-      arr.map(d => (d.id === id ? { ...d, sheet: mut(d.sheet) } : d))
-    );
+    this.sheets.update(arr => arr.map(d => (d.id === id ? { ...d, sheet: mut(d.sheet) } : d)));
     this.saveToStorage();
   }
 
-  /** Actualiza parcialmente la ficha seleccionada */
   patchSelected(patch: Partial<CharacterSheet>) {
     this.updateSelected(s => ({ ...s, ...patch }));
   }
 
-  /** Cambia la ficha activa */
   select(id: string) {
     if (this.sheets().some(d => d.id === id)) {
       this.selectedId.set(id);
+      this.saveToStorage();
     }
   }
 
-  /** Crea una nueva ficha y la selecciona */
   createNew(initial?: Partial<CharacterSheet>): string {
     const id = uid();
-    const doc: CharacterDoc = { id, sheet: { ...defaultSheet(), ...(initial || {}) } };
+    const doc: CharacterDoc = { id, sheet: normalizeDoc({ sheet: { ...defaultSheet(), ...(initial || {}) } }).sheet };
     this.sheets.update(arr => [...arr, doc]);
     this.selectedId.set(id);
     this.saveToStorage();
     return id;
   }
 
-  /** Duplica la ficha actual y la selecciona */
   duplicateSelected(): string | null {
     const id = this.selectedId();
     if (!id) return null;
@@ -123,11 +167,9 @@ export class CharacterService {
     return cloneId;
   }
 
-  /** Elimina una ficha */
   delete(id: string) {
     const next = this.sheets().filter(d => d.id !== id);
     this.sheets.set(next);
-    // Reajusta selección
     if (!next.length) {
       this.selectedId.set(null);
     } else if (!next.some(d => d.id === this.selectedId())) {
@@ -136,25 +178,17 @@ export class CharacterService {
     this.saveToStorage();
   }
 
-  /** Guarda en localStorage (todas las fichas) */
   saveLocal() {
     this.saveToStorage();
   }
 
-  // ======= Métodos relacionados con “mesa” (stub/compatibilidad) =======
-  /** Lista de personajes compartidos (tal y como usas en la UI) */
+  // ======= “Mesa” (stub) =======
   readonly roomChars = signal<Array<{ sheet: CharacterSheet }>>([]);
-
   shareToTable() {
-    // Implementa aquí tu lógica real de compartir; de momento empujamos la seleccionada a la lista visual
     const sel = this.sheet();
     this.roomChars.update(arr => [...arr, { sheet: { ...sel } }]);
-    this.socket.emit('character:upsert', { sheet: this.sheet() });
   }
-
-  requestAll() {
-    // Carga desde red en caso real
-  }
+  requestAll() {}
 
   // ======= Persistencia =======
   private saveToStorage() {
@@ -164,23 +198,8 @@ export class CharacterService {
         docs: this.sheets()
       });
       localStorage.setItem(this.STORAGE_KEY, payload);
-    } catch { /* ignore */ }
-  }
-
-  private loadFromStorage(): CharacterDoc[] {
-    try {
-      const raw = localStorage.getItem(this.STORAGE_KEY);
-      if (!raw) return [ { id: uid(), sheet: defaultSheet() } ];
-      const parsed = JSON.parse(raw) as { selectedId: string | null; docs: CharacterDoc[] };
-      // asegura ids y estructura
-      const docs = (parsed.docs || []).map(d => ({ id: d.id || uid(), sheet: d.sheet || defaultSheet() }));
-      // restaura selección si existe
-      if (parsed.selectedId && docs.some(d => d.id === parsed.selectedId)) {
-        this.selectedId.set(parsed.selectedId);
-      }
-      return docs.length ? docs : [ { id: uid(), sheet: defaultSheet() } ];
     } catch {
-      return [ { id: uid(), sheet: defaultSheet() } ];
+      // ignore write errors (quota, etc.)
     }
   }
 }
