@@ -267,3 +267,206 @@ html.app-scale-80 {
 
 
 
+
+
+// DRAWER CHARACTER
+
+/* ========= FICHA EN DRAWER: FORZAR OSCURO (GLOBAL) ========= */
+
+/* Paleta */
+.sheet-drawer {
+  --ink:#f9fafb; --muted:#d1d5db; --bg:#111827;
+  --gem:#8b5cf6; --emerald:#10b981; --rose:#ef4444; --gold:#d4af37;
+  color: var(--ink);
+}
+
+/* Chrome del drawer */
+.sheet-drawer .ant-drawer-content,
+.sheet-drawer .ant-drawer-wrapper-body,
+.sheet-drawer .ant-drawer-header,
+.sheet-drawer .ant-drawer-body {
+  background: #0b1020 !important;
+  color: var(--ink) !important;
+  border: 0 !important;
+}
+
+/* Card principal (vidrio) */
+.sheet-drawer .char-card.ant-card,
+.sheet-drawer .char-card .ant-card-body,
+.sheet-drawer .char-card .ant-card-head {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03)),
+    rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  backdrop-filter: blur(6px);
+  color: var(--ink) !important;
+  box-shadow: 0 20px 50px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.14);
+  border-radius: 16px;
+}
+.sheet-drawer .char-card .ant-card-head-title { color: var(--ink) !important; font-weight: 800; }
+
+/* Avatar */
+.sheet-drawer .avatar-lg {
+  background: linear-gradient(180deg,#222a3a,#182032) !important;
+  border:2px solid rgba(255,255,255,.18) !important;
+  color:#fff !important;
+  box-shadow: 0 10px 22px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+/* Inputs y textareas (legibles) */
+.sheet-drawer .ant-input,
+.sheet-drawer .ant-input-number,
+.sheet-drawer .ant-input-number-input,
+.sheet-drawer textarea.ant-input {
+  background: rgba(255,255,255,.97) !important;
+  color: #111827 !important;         /* ← texto negro */
+  border-color: rgba(17,24,39,.25) !important;
+  border-radius: 10px !important;
+}
+.sheet-drawer .ant-input-affix-wrapper-focused,
+.sheet-drawer .ant-input-number-focused {
+  box-shadow: 0 0 0 2px rgba(139,92,246,.25) !important;
+  border-color: var(--gem) !important;
+}
+
+/* Chips meta */
+.sheet-drawer .chip {
+  background:
+    radial-gradient(300px 140px at 20% 0%, rgba(139,92,246,.12), transparent 70%),
+    rgba(255,255,255,.06) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  color: var(--ink) !important;
+}
+.sheet-drawer .chip-label {
+  background: rgba(255,255,255,.05) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  color: var(--ink) !important;
+}
+
+/* Tabs */
+.sheet-drawer .ant-tabs-nav { border-bottom:1px solid rgba(255,255,255,.12) !important; }
+.sheet-drawer .ant-tabs-tab { color: var(--muted) !important; }
+.sheet-drawer .ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn { color: var(--ink) !important; font-weight: 800; }
+.sheet-drawer .ant-tabs-ink-bar { background: linear-gradient(90deg,var(--gem),var(--emerald)) !important; }
+
+/* Baldosas (stats/abilities) */
+.sheet-drawer .stat,
+.sheet-drawer .ability,
+.sheet-drawer .party .it {
+  background:
+    radial-gradient(380px 160px at -20% 120%, rgba(139,92,246,.10), transparent 60%),
+    rgba(255,255,255,.04) !important;
+  border:1px solid rgba(255,255,255,.12) !important;
+  color: var(--ink) !important;
+}
+.sheet-drawer .stat .stat-label,
+.sheet-drawer .muted { color: var(--muted) !important; }
+
+/* Badge del modificador */
+.sheet-drawer .mod-badge {
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255,255,255,.15), rgba(255,255,255,0) 55%),
+    rgba(16,185,129,.16) !important;
+  border:1px solid rgba(16,185,129,.4) !important;
+  color: var(--ink) !important;
+  text-shadow: 0 1px 0 rgba(0,0,0,.35);
+}
+
+/* XP */
+.sheet-drawer .xp-block {
+  background:
+    radial-gradient(600px 300px at 100% -20%, rgba(139,92,246,.10), transparent 60%),
+    rgba(255,255,255,.05) !important;
+  border:1px dashed rgba(139,92,246,.35) !important;
+  color: var(--ink) !important;
+}
+.sheet-drawer .xp-progress .ant-progress-bg {
+  background: linear-gradient(90deg,var(--gem),var(--emerald)) !important;
+}
+
+/* Botones */
+.sheet-drawer .ant-btn { border-radius: 10px !important; }
+.sheet-drawer .ant-btn-primary {
+  background: linear-gradient(180deg,#7c3aed,#6d28d9) !important;
+  border: none !important;
+  color: #fff !important;
+  font-weight: 800 !important;
+}
+.sheet-drawer .ant-btn-default {
+  background: rgba(255,255,255,.06) !important;
+  border:1px solid rgba(255,255,255,.16) !important;
+  color: var(--ink) !important;
+}
+.sheet-drawer .ant-btn-dangerous.ant-btn-default {
+  background: rgba(239,68,68,.12) !important;
+  border-color: rgba(239,68,68,.35) !important;
+  color: #fecaca !important;
+}
+
+/* Separadores */
+.sheet-drawer .line { border-top:1px solid rgba(255,255,255,.12) !important; }
+
+
+/* Drawer content */
+.ant-drawer-content {
+  background-color: rgba(17, 24, 39, 0.92) !important; /* gris casi negro */
+  background-image:
+    radial-gradient(1200px 600px at 100% -20%, rgba(139,92,246,.10), transparent 60%),
+    radial-gradient(1200px 600px at -20% 100%, rgba(16,185,129,.10), transparent 60%),
+    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)) !important;
+
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.15);
+  color: #f9fafb !important;
+}
+
+/* Drawer body */
+.ant-drawer-body {
+  background-color: transparent !important;
+  color: #f9fafb !important;
+}
+
+/* Drawer header */
+.ant-drawer-header {
+  background: rgba(255,255,255,0.06) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.10) !important;
+  color: #f9fafb !important;
+}
+
+/* Texto e inputs */
+.ant-input,
+.ant-input-number,
+.ant-input-number-input {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: #e5e7eb !important;
+}
+
+/* Tema oscuro del Drawer de la ficha */
+.rpg-drawer .ant-drawer-content{
+  background:
+    radial-gradient(1400px 700px at 120% -20%, rgba(139,92,246,.10), transparent 60%),
+    radial-gradient(1400px 700px at -20% 120%, rgba(16,185,129,.10), transparent 60%),
+    #0f172a !important;
+  color: #f9fafb !important;
+}
+.rpg-drawer .ant-drawer-header{
+  background: rgba(255,255,255,.05) !important;
+  border-bottom: 1px solid rgba(255,255,255,.10) !important;
+  color: #f9fafb !important;
+}
+.rpg-drawer .ant-drawer-title,
+.rpg-drawer .ant-drawer-close{ color: #f9fafb !important; }
+
+/* Tarjeta de la ficha */
+.rpg-drawer .char-card{
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)),
+    rgba(255,255,255,.04) !important;
+  border: 1px solid rgba(255,255,255,.10) !important;
+  color: #f9fafb !important;
+}
+
+/* Inputs, tabs, botones, etc. (igual que ya tenías) */

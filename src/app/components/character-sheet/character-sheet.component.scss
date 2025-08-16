@@ -1,5 +1,6 @@
 
 
+
 :host {
   --shell-offset: 72px;
   --left-w: clamp(420px, 34vw, 600px);
@@ -14,22 +15,25 @@
   --gold: #d4af37;
 }
 
-
 .char-card {
   width: 100%;
   max-width: 100%;
   overflow: hidden;
   border-radius: 14px;
-
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03)), rgba(17, 24, 39, 0.55) !important; 
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: #f3f4f6; /* texto claro */
+
 }
 
 /* ===== Cabecera ===== */
 .header { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 4px; }
 .avatar-lg {
+  width: 64px !important;
+  height: 64px !important;
+  font-size: 20px !important;
+  // border: 2px solid #f0f0f0;
   border: 2px solid #f0f0f0;
   width: 64px !important; height: 64px !important; font-size: 20px !important;
   border: 2px solid rgba(255,255,255,0.2);
@@ -364,4 +368,3 @@ h4, ::ng-deep .ant-tabs-tab-btn, .prof-left {
 }
 
 .party .it .small { color: #8c8c8c; }
-

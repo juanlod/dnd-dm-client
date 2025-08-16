@@ -105,7 +105,9 @@
   nzTitle="🧝 Ficha de personaje"
   [nzMaskClosable]="true"
   [nzClosable]="true"
+  [nzWrapClassName]="'rpg-drawer'" 
   (nzOnClose)="closeSheet()"
 >
   <app-character-sheet *nzDrawerContent></app-character-sheet>
 </nz-drawer>
+
