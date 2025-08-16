@@ -1,4 +1,5 @@
 
+
 :host {
   --shell-offset: 72px;
   --left-w: clamp(420px, 34vw, 600px);
@@ -12,6 +13,7 @@
   --emerald: #10b981;
   --gold: #d4af37;
 }
+
 
 .char-card {
   width: 100%;
@@ -156,6 +158,7 @@
   color: #f9fafb;
 }
 .party .it .nm { font-weight: 700; }
+
 .party .it .small { color: #9ca3af; }
 
 
@@ -359,3 +362,6 @@ h4, ::ng-deep .ant-tabs-tab-btn, .prof-left {
     font-size: 16px;
   }
 }
+
+.party .it .small { color: #8c8c8c; }
+
