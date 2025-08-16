@@ -1,48 +1,114 @@
+:host {
+  --ink: #f9fafb;
+  --muted: #d1d5db;
+  --bg: #111827;
+  --gem: #8b5cf6;
+  --emerald: #10b981;
+  --gold: #d4af37;
+}
+
 .roller {
   display: grid;
-  gap: 10px;
+  gap: 14px;
+  color: var(--ink);
 }
 
-.notation {
+/* ===== Cabecera ===== */
+.hdr {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
+}
+.ttl {
+  font-weight: 700;
+  font-size: 16px;
+  margin: 0;
+  color: var(--ink);
 }
 
+/* ===== Botones de dados ===== */
+.types button[nz-button],
+.presets button[nz-button],
+.actions button[nz-button],
+.inline button[nz-button] {
+  background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03)),
+              rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--ink);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.types button[nz-button]:hover,
+.presets button[nz-button]:hover,
+.actions button[nz-button]:hover,
+.inline button[nz-button]:hover {
+  background: linear-gradient(180deg, rgba(139,92,246,.15), rgba(139,92,246,.05));
+  border-color: var(--gem);
+  color: #fff;
+}
+
+.types button[nz-button][nzType="primary"] {
+  background: linear-gradient(90deg, var(--gem), var(--emerald));
+  border: none;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ===== Campos numéricos ===== */
+.field label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+nz-input-number {
+  background: rgba(255,255,255,0.9);
+  border-radius: 8px;
+  padding: 4px 6px;
+  color: #111 !important; /* texto negro */
+}
+nz-input-number input {
+  color: #111 !important; /* aseguramos legibilidad */
+}
+
+/* ===== Layout ===== */
 .types {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
-  gap: 6px;
+  gap: 8px;
 }
 
 .row {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 10px;
+  gap: 14px;
 }
-.field label {
-  display: block;
-  font-size: 12px;
-  color: #8c8c8c;
-  margin-bottom: 4px;
+
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
-.inline { display: flex; align-items: center; gap: 6px; }
 
 .presets {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   flex-wrap: wrap;
 }
+
 .presets .hint {
   font-size: 12px;
-  color: #8c8c8c;
-  margin-right: 2px;
+  color: var(--muted);
 }
 
 .actions {
   display: flex;
   justify-content: flex-end;
 }
+
 /* ===== Campos numéricos (oscuro) ===== */
 nz-input-number {
   background: rgba(255, 255, 255, 0.05);

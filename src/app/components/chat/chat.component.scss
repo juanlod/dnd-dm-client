@@ -288,3 +288,32 @@ app-combat-fx-overlay {
 }
 
 
+
+/* ===== Chips debajo del input ===== */
+.chips.under {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.chips.under li button[nz-button] {
+  border-radius: 999px; /* completamente redondeado */
+  padding: 4px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.08); /* oscuro translúcido */
+  color: var(--ink);
+  backdrop-filter: blur(4px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.25);
+  transition: all 0.2s ease;
+}
+
+.chips.under li button[nz-button]:hover {
+  background: rgba(139,92,246,0.2); /* violeta translúcido */
+  border-color: rgba(139,92,246,0.35);
+  color: var(--ink);
+}
