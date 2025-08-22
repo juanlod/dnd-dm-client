@@ -119,7 +119,7 @@ export class CharacterService {
   /** Clave de almacenamiento en localStorage */
   private STORAGE_KEY = 'rpg.multichar.v1';
   private socket = inject(SocketService);
-  
+
   /**
    * 1) Leemos localStorage una sola vez en un bloque IIFE.
    *    No tocamos señales dentro del loader para evitar estados inconsistentes.
@@ -262,14 +262,67 @@ export class CharacterService {
   readonly roomChars = signal<Array<{ sheet: CharacterSheet }>>([]);
 
   /** Simula compartir el personaje activo a la “mesa” */
+  /** Simula compartir el personaje activo a la “mesa” + publica snapshot por chat para el DM */
   shareToTable() {
     const sel = this.sheet();
+
+    // === 1) Mantener lo actual ===
     this.roomChars.update(arr => [...arr, { sheet: { ...sel } }]);
     this.socket.emit('character:upsert', { sheet: this.sheet() });
+
+    // === 2) Construir mensaje completo con TODOS los datos ===
+    try {
+      const pp = calcPassivePerception(sel);
+
+      // Armamos detalle en formato multilínea
+      const details = `
+  Clase: ${sel.clazz || '—'}
+  Nivel: ${sel.level}
+  Linaje/Raza: ${sel.ancestry || '—'}
+  Alineamiento: ${sel.alignment || '—'}
+  CA: ${sel.ac}
+  HP: ${sel.hp}/${sel.maxHp}
+  Velocidad: ${sel.speed} ft.
+  Bonif. Competencia: +${sel.profBonus}
+  PP: ${pp}
+  
+  Atributos:
+    STR: ${sel.abilities?.str}  DEX: ${sel.abilities?.dex}  CON: ${sel.abilities?.con}
+    INT: ${sel.abilities?.int}  WIS: ${sel.abilities?.wis}  CHA: ${sel.abilities?.cha}
+  
+  Habilidades:
+  ${Object.entries(sel.skills || {})
+          .map(([k, v]) => `  - ${k}: ${v}`)
+          .join('\n')}
+  
+  Rasgos:
+  ${(sel.features || []).map(f => `  - ${f}`).join('\n')}
+  
+  Inventario:
+  ${sel.inventory || '—'}
+  
+  Conjuros:
+  ${sel.spells || '—'}
+  
+  Notas:
+  ${sel.notes || '—'}
+      `.trim();
+
+      // Encabezado + todo el detalle
+      const summary =
+        `@dm Ficha completa compartida: ${sel.name || 'Sin nombre'}\n` +
+        details;
+
+      // Enviamos como mensaje al DM
+      this.socket.sendMessage(summary, true);
+    } catch (e) {
+      console.error('Error compartiendo ficha:', e);
+    }
   }
 
+
   /** Punto de extensión: pedir fichas compartidas al servidor, etc. */
-  requestAll() {}
+  requestAll() { }
 
   // =========================
   //   Persistencia interna
@@ -291,4 +344,21 @@ export class CharacterService {
       // Silenciamos errores de escritura (cuota, navegación privada, etc.)
     }
   }
+}
+
+
+/** PP rápido sin depender de componentes (igual que tu computed pp()) */
+function calcPassivePerception(s: CharacterSheet): number {
+  const mod = (v: number) => Math.floor((Number(v) - 10) / 2);
+  const base = 10 + mod(s.abilities?.wis ?? 10);
+  const st = s.skills?.Perception as ('prof' | 'expert' | 'none' | undefined);
+  const pb = s.profBonus ?? Math.max(2, Math.ceil((s.level ?? 1) / 4) + 1);
+  const extra = st === 'prof' ? pb : st === 'expert' ? pb * 2 : 0;
+  const override = (s as any)?.senses?.passivePerception;
+  return typeof override === 'number' ? override : base + extra;
+}
+
+/** UTF-8 → Base64 seguro en navegador */
+function toB64(s: string): string {
+  return btoa(unescape(encodeURIComponent(s)));
 }

@@ -56,6 +56,11 @@ export class ChatComponent implements OnInit, OnDestroy {
   private router = inject(Router);          // Para navegar al salir de la mesa
   private socket = inject(SocketService);   // Acciones del DM/mesa
   private fx = inject(CombatFxService);     // Animaciones de combate
+  // Lista reactiva de jugadores desde el ChatService
+  players = this.chat.playersSig;
+
+  // Helper para marcar al propio usuario
+  isMe = (name?: string) => !!name && name === this.chat.name;
 
   // --- Estado de la vista ---
   messages: Message[] = []; // Lista que pintamos en la log
@@ -88,7 +93,7 @@ export class ChatComponent implements OnInit, OnDestroy {
   // ================= Ciclo de vida =================
   ngOnInit() {
 
-    
+
 
     this.sub = this.chat.messages$.subscribe(ms => {
       const el = this.logRef?.nativeElement;
@@ -111,9 +116,9 @@ export class ChatComponent implements OnInit, OnDestroy {
 
     this.socket.on('dm', this.onDmIncoming);
 
-  // 👇 sincroniza cabecera inmediatamente con la identidad ya fijada por ChatService.login
-  this.nameSig.set(this.chat.name);
-  this.roomSig.set(this.chat.roomId);
+    // 👇 sincroniza cabecera inmediatamente con la identidad ya fijada por ChatService.login
+    this.nameSig.set(this.chat.name);
+    this.roomSig.set(this.chat.roomId);
 
     this.socket.on('dm', this.onDmIncoming);
   }
@@ -176,6 +181,8 @@ export class ChatComponent implements OnInit, OnDestroy {
    */
   leaveRoom() {
     this.chat.reset();
+    // 1) Limpia mensajes en memoria e historial local de la sala actual
+    this.chat.endSession();
     this.router.navigateByUrl('/login');
   }
 

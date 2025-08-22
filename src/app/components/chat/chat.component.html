@@ -92,6 +92,34 @@
     <section class="panel">
       <app-dice-roller></app-dice-roller>
     </section>
+
+
+    <section class="panel">
+      <h3 nz-typography class="side-title">Conectados ({{ players().length }})</h3>
+  
+      <ul class="users-list">
+        <li class="user-it" *ngFor="let p of players()">
+          <nz-avatar
+            class="avatar"
+            [nzText]="initial(p.name)"
+            [ngClass]="colorFor(p.name)">
+          </nz-avatar>
+  
+          <div class="user-txt">
+            <div class="nm">
+              {{ p.name }}
+              <nz-tag *ngIf="isMe(p.name)" nzColor="blue">tú</nz-tag>
+            </div>
+            <div class="meta small" *ngIf="p.status || p.role">
+              <span *ngIf="p.role">{{ p.role }}</span>
+              <span *ngIf="p.status">• {{ p.status }}</span>
+            </div>
+          </div>
+        </li>
+  
+        <li class="muted" *ngIf="!players().length">Nadie conectado aún…</li>
+      </ul>
+    </section>
   </aside>
 </div>
 

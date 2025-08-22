@@ -2,6 +2,7 @@ import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { ChatPayload, DmPayload, RoomPlayer, SocketService } from './socket.service';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 export type MessageType = 'system' | 'user' | 'dm' | 'roll';
 
@@ -13,8 +14,11 @@ export interface Message {
   ts: number; // epoch ms
 }
 
-/** Clave usada para recordar login en localStorage */
+/** Claves de almacenamiento */
 const LS_LOGIN_KEY = 'dnddm.login';
+const LS_CHAT_PREFIX = 'dnddm.chat.';         // 👈 prefijo por sala
+const CHAT_MAX_LEN = 500;                     // límite de mensajes en memoria
+const CHAT_TRIM_CHUNK = 100;                  // recorte cuando excede
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
@@ -29,7 +33,7 @@ export class ChatService {
   playersSig = signal<RoomPlayer[]>([]);
   private subs: Subscription[] = [];
 
-  constructor(private socket: SocketService, private router: Router) {
+  constructor(private socket: SocketService, private router: Router, private msg: NzMessageService ) {
     this.socket.connect();
 
     // === Suscripciones a eventos del socket ===
@@ -39,13 +43,10 @@ export class ChatService {
         this._roomId = roomId;
         this._name = nickname;
 
-        this.push({
-          from: 'System',
-          text: `Conectado a "${roomId}" como ${nickname}`,
-          type: 'system',
-          ts: Date.now()
-        });
+        // 👇 Carga historial local de ESTA sala antes de mostrar el "Conectado…"
+        this.loadRoomHistory(roomId);
 
+        this.msg.success(`Conectado a "${roomId}" como ${nickname}`);
         // Si aún estás en login, lleva a /mesa
         if (!location.hash.includes('/mesa') && !location.pathname.includes('/mesa')) {
           this.router.navigateByUrl('/mesa');
@@ -91,6 +92,8 @@ export class ChatService {
     // Borrado remoto del chat
     this.socket.chatCleared$.subscribe(({ by }) => {
       this._messages.next([]);
+      // 👇 también borramos persistencia local de la sala actual
+      this.clearRoomHistory(this._roomId);
       this.addSystem(`🧹 ${by} vació el chat aquí.`);
     });
   }
@@ -138,19 +141,36 @@ export class ChatService {
     this.socket.announce(text.trim());
   }
 
-  reset() {
+  /**
+   * Termina la sesión actual:
+   * - Limpia mensajes en memoria
+   * - Borra historial local de la sala actual
+   * - Limpia identidad y señales
+   */
+  endSession() {
+    const prevRoom = this._roomId;
     this._messages.next([]);
+    this.clearRoomHistory(prevRoom);   // 👈 borra persistencia de la sala
     this._name = '';
     this._roomId = '';
     this.playersSig.set([]);
     localStorage.removeItem(LS_LOGIN_KEY);
   }
 
+  /** Compat: algunos sitios ya llaman reset(); lo dejamos como alias */
+  reset() {
+    this.endSession();
+  }
+
   private push(m: Message) {
     const v = this._messages.value;
     v.push(m);
-    if (v.length > 500) v.splice(0, 100);
-    this._messages.next([...v]);
+    if (v.length > CHAT_MAX_LEN) v.splice(0, CHAT_TRIM_CHUNK);
+    const snapshot = [...v];
+    this._messages.next(snapshot);
+
+    // 👇 persistimos tras cada push, por sala
+    this.persistMessages(this._roomId, snapshot);
   }
 
   private saveLogin(name: string, roomId: string) {
@@ -175,9 +195,58 @@ export class ChatService {
     const cur = this._messages.value.slice();
     cur.push({ type: 'system', text, ts: Date.now() });
     this._messages.next(cur);
+    // 👇 y lo persistimos también
+    this.persistMessages(this._roomId, cur);
   }
 
   clearLocal() {
     this._messages.next([]);
+    // 👇 limpiar persistencia de esta sala
+    this.clearRoomHistory(this._roomId);
+  }
+
+  // =========================
+  //  Persistencia por sala
+  // =========================
+
+  private keyFor(roomId: string) {
+    const id = (roomId || '').trim() || '__no_room__';
+    return `${LS_CHAT_PREFIX}${id}`;
+  }
+
+  /** Guarda el array de mensajes de la sala en localStorage */
+  private persistMessages(roomId: string, msgs: Message[]) {
+    if (!roomId) return; // si no hay sala, no persistimos
+    try {
+      // Evitar almacenar más de CHAT_MAX_LEN en disco también
+      const safe = msgs.slice(-CHAT_MAX_LEN);
+      localStorage.setItem(this.keyFor(roomId), JSON.stringify(safe));
+    } catch { /* ignore quota errors */ }
+  }
+
+  /** Carga (y publica) el historial local de una sala; si no hay, deja vacío */
+  private loadRoomHistory(roomId: string) {
+    if (!roomId) { this._messages.next([]); return; }
+    try {
+      const raw = localStorage.getItem(this.keyFor(roomId));
+      if (!raw) { this._messages.next([]); return; }
+      const arr = JSON.parse(raw) as Message[] | null;
+      if (!Array.isArray(arr)) { this._messages.next([]); return; }
+      // Sanitiza mínimamente: asegura shape y tamaño
+      const safe = arr
+        .filter(x => x && typeof x === 'object' && typeof x.type === 'string')
+        .slice(-CHAT_MAX_LEN);
+      this._messages.next(safe);
+    } catch {
+      this._messages.next([]);
+    }
+  }
+
+  /** Borra el historial local de una sala concreta */
+  private clearRoomHistory(roomId: string) {
+    if (!roomId) return;
+    try {
+      localStorage.removeItem(this.keyFor(roomId));
+    } catch { /* ignore */ }
   }
 }
