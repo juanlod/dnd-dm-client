@@ -154,7 +154,6 @@ export class ChatService {
     this._name = '';
     this._roomId = '';
     this.playersSig.set([]);
-    localStorage.removeItem(LS_LOGIN_KEY);
   }
 
   /** Compat: algunos sitios ya llaman reset(); lo dejamos como alias */
