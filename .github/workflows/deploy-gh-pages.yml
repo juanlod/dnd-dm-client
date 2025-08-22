@@ -2,20 +2,20 @@ name: Deploy Angular to GH Pages
 
 on:
   push:
-    branches: [ main ]  # o tu rama
+    branches: [ main ]
+
+permissions:
+  contents: write   # necesario para empujar a gh-pages
 
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: client
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # necesario para que angular-cli-ghpages pueda crear la rama gh-pages
+          fetch-depth: 0
 
       - name: Use Node
         uses: actions/setup-node@v4
@@ -28,11 +28,10 @@ jobs:
       - name: Build (prod con base-href del repo)
         run: npm run build -- --configuration production --base-href "/dnd-dm-client/"
 
-      # Opcional: instala la CLI global (también puedes usar npx sin este paso)
       - name: Install angular-cli-ghpages
         run: npm i -g angular-cli-ghpages
 
-      - name: Deploy to GH Pages with angular-cli-ghpages
+      - name: Deploy to GH Pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
