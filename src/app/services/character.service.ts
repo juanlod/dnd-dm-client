@@ -1,12 +1,18 @@
-// character.service.ts (completo y corregido)
-import { Injectable, Signal, computed, signal } from '@angular/core';
+// character.service.ts (completo y comentado)
+import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { CharacterSheet } from '../models/character';
+import { SocketService } from './socket.service';
 
+/** Documento que envuelve una ficha: id estable + datos de la ficha */
 export interface CharacterDoc {
   id: string;
   sheet: CharacterSheet;
 }
 
+/**
+ * Genera un id pseudo-único legible.
+ * Formato: c-YYYYMMDDHHmmss-XXXX
+ */
 function uid(prefix = 'c'): string {
   const pad = (n: number) => n.toString().padStart(2, '0');
   const d = new Date();
@@ -22,7 +28,10 @@ function uid(prefix = 'c'): string {
   return `${prefix}-${ts}-${rand}`;
 }
 
-/** Defaults seguros según tu modelo */
+/**
+ * Ficha por defecto, con valores seguros.
+ * IMPORTANTE: respeta los tipos reales del modelo (p. ej. features: string[]).
+ */
 function defaultSheet(): CharacterSheet {
   return {
     name: 'Nuevo personaje',
@@ -39,25 +48,32 @@ function defaultSheet(): CharacterSheet {
     abilities: { str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10 } as any,
     skills: {},
     senses: {},
-    features: [],     // OJO: arrays si tu modelo los define así
+    features: [],     // ← si tu modelo define array, iniciamos como []
     inventory: '',
     spells: '',
     notes: ''
   } as CharacterSheet;
 }
 
-/** Migra/normaliza un CharacterDoc que viene de localStorage */
+/**
+ * Normaliza/migra un CharacterDoc que viene de localStorage.
+ * - Rellena valores por defecto.
+ * - Arregla cambios de esquema (p. ej. features string → string[]).
+ * - Sanea números a rangos razonables.
+ */
 function normalizeDoc(d: Partial<CharacterDoc>): CharacterDoc {
   const base = defaultSheet();
   const s: any = { ...base, ...(d?.sheet ?? {}) };
 
-  // Normalizaciones por si cambió el esquema entre versiones
+  // --- Migraciones suaves por cambios de esquema ---
+  // Si features no es array, lo convertimos desde texto multilínea
   if (Array.isArray(s.features) === false) s.features = (s.features ?? '').toString().split('\n').filter(Boolean);
+  // Asegura objetos válidos
   if (s.skills == null || typeof s.skills !== 'object') s.skills = {};
   if (s.senses == null || typeof s.senses !== 'object') s.senses = {};
   if (s.abilities == null || typeof s.abilities !== 'object') s.abilities = base.abilities;
 
-  // Números razonables
+  // --- Saneado de números con límites mínimos ---
   s.level = Math.max(1, Number(s.level || 1));
   s.ac = Math.max(1, Number(s.ac || 10));
   s.maxHp = Math.max(1, Number(s.maxHp || 8));
@@ -71,33 +87,46 @@ function normalizeDoc(d: Partial<CharacterDoc>): CharacterDoc {
   };
 }
 
-/** Lectura única desde localStorage sin tocar señales */
+/**
+ * Lee UNA sola vez del localStorage sin tocar señales (para evitar
+ * problemas de orden de inicialización).
+ * Devuelve documentos normalizados y el id seleccionado si es válido.
+ */
 function readFromStorage(key: string): { docs: CharacterDoc[]; selectedId: string | null } {
   try {
     const raw = localStorage.getItem(key);
     if (!raw) return { docs: [], selectedId: null };
+
     const parsed = JSON.parse(raw) as { docs?: Partial<CharacterDoc>[]; selectedId?: string | null };
 
+    // Normaliza cada documento
     const docs = (parsed.docs ?? []).map(normalizeDoc).filter(Boolean);
+
+    // Si el selectedId almacenado no existe en docs, cae al primero
     const selectedId = parsed.selectedId && docs.some(d => d.id === parsed.selectedId)
       ? parsed.selectedId!
       : (docs[0]?.id ?? null);
 
     return { docs, selectedId };
   } catch {
-    // Si hay datos corruptos, devolvemos vacío
+    // Si el JSON está corrupto o hay cualquier error, arrancamos vacío
     return { docs: [], selectedId: null };
   }
 }
 
 @Injectable({ providedIn: 'root' })
 export class CharacterService {
+  /** Clave de almacenamiento en localStorage */
   private STORAGE_KEY = 'rpg.multichar.v1';
-
-  // 1) Leemos una sola vez del storage, sin tocar aún señales
+  private socket = inject(SocketService);
+  
+  /**
+   * 1) Leemos localStorage una sola vez en un bloque IIFE.
+   *    No tocamos señales dentro del loader para evitar estados inconsistentes.
+   *    Si no hay datos, creamos un documento por defecto.
+   */
   private readonly _initial = (() => {
     const { docs, selectedId } = readFromStorage(this.STORAGE_KEY);
-    // Si no había nada, creamos uno por defecto
     if (!docs.length) {
       const first: CharacterDoc = { id: uid(), sheet: defaultSheet() };
       return { docs: [first], selectedId: first.id };
@@ -105,19 +134,33 @@ export class CharacterService {
     return { docs, selectedId: selectedId ?? docs[0].id };
   })();
 
-  // 2) Creamos señales con esos valores iniciales (sin efectos secundarios)
+  /**
+   * 2) Creamos las señales con los valores iniciales (estado reactivo).
+   *    - sheets: colección de fichas.
+   *    - selectedId: id de la ficha activa.
+   */
   readonly sheets = signal<CharacterDoc[]>(this._initial.docs);
   readonly selectedId = signal<string | null>(this._initial.selectedId);
 
-  // 3) Hoja seleccionada como Signal<CharacterSheet>
+  /**
+   * 3) Signal derivada para obtener la ficha activa (solo lectura).
+   *    Nunca devolvemos undefined: si no hay match, devolvemos un default
+   *    para que el template no rompa bindings.
+   */
   readonly sheet: Signal<CharacterSheet> = computed(() => {
     const sel = this.selectedId();
     const doc = this.sheets().find(d => d.id === sel);
-    // Nunca devolvemos undefined para no romper el binding
     return (doc?.sheet ?? defaultSheet());
   });
 
-  // ===== API =====
+  // =========================
+  // =====  API pública  =====
+  // =========================
+
+  /**
+   * Reemplaza completamente la ficha seleccionada aplicando un mutador.
+   * - Persiste el cambio en localStorage.
+   */
   updateSelected(mut: (s: CharacterSheet) => CharacterSheet) {
     const id = this.selectedId();
     if (!id) return;
@@ -125,10 +168,17 @@ export class CharacterService {
     this.saveToStorage();
   }
 
+  /**
+   * Actualiza parcialmente la ficha seleccionada (merge superficial).
+   * - Internamente usa updateSelected para mantener un solo punto de guardado.
+   */
   patchSelected(patch: Partial<CharacterSheet>) {
     this.updateSelected(s => ({ ...s, ...patch }));
   }
 
+  /**
+   * Cambia la ficha activa por id (si existe) y persiste la selección.
+   */
   select(id: string) {
     if (this.sheets().some(d => d.id === id)) {
       this.selectedId.set(id);
@@ -136,8 +186,14 @@ export class CharacterService {
     }
   }
 
+  /**
+   * Crea una nueva ficha, opcionalmente con valores iniciales,
+   * la añade a la colección, la selecciona y persiste todo.
+   * Devuelve el id creado.
+   */
   createNew(initial?: Partial<CharacterSheet>): string {
     const id = uid();
+    // Normalizamos por si initial trae campos con otro formato
     const doc: CharacterDoc = { id, sheet: normalizeDoc({ sheet: { ...defaultSheet(), ...(initial || {}) } }).sheet };
     this.sheets.update(arr => [...arr, doc]);
     this.selectedId.set(id);
@@ -145,6 +201,11 @@ export class CharacterService {
     return id;
   }
 
+  /**
+   * Duplica la ficha seleccionada como una nueva en nivel 1 y HP al máximo,
+   * selecciona la copia y persiste.
+   * Devuelve el id de la copia o null si no había seleccionada.
+   */
   duplicateSelected(): string | null {
     const id = this.selectedId();
     if (!id) return null;
@@ -167,6 +228,12 @@ export class CharacterService {
     return cloneId;
   }
 
+  /**
+   * Elimina una ficha por id. Si borras la seleccionada:
+   * - Si hay más fichas, selecciona la primera.
+   * - Si no queda ninguna, selectedId pasa a null.
+   * Siempre persiste el nuevo estado.
+   */
   delete(id: string) {
     const next = this.sheets().filter(d => d.id !== id);
     this.sheets.set(next);
@@ -178,19 +245,41 @@ export class CharacterService {
     this.saveToStorage();
   }
 
+  /**
+   * Guarda explícitamente en localStorage.
+   * (No es estrictamente necesario porque todas las mutaciones ya guardan,
+   *  pero lo exponemos por comodidad de la UI.)
+   */
   saveLocal() {
     this.saveToStorage();
   }
 
-  // ======= “Mesa” (stub) =======
+  // =========================
+  //  “Mesa” (stub/ejemplo)
+  // =========================
+
+  /** Lista reactiva de personajes compartidos con la mesa (demo) */
   readonly roomChars = signal<Array<{ sheet: CharacterSheet }>>([]);
+
+  /** Simula compartir el personaje activo a la “mesa” */
   shareToTable() {
     const sel = this.sheet();
     this.roomChars.update(arr => [...arr, { sheet: { ...sel } }]);
+    this.socket.emit('character:upsert', { sheet: this.sheet() });
   }
+
+  /** Punto de extensión: pedir fichas compartidas al servidor, etc. */
   requestAll() {}
 
-  // ======= Persistencia =======
+  // =========================
+  //   Persistencia interna
+  // =========================
+
+  /**
+   * Serializa y guarda en localStorage el estado mínimo:
+   * - selectedId: id de la ficha activa
+   * - docs: colección completa de fichas
+   */
   private saveToStorage() {
     try {
       const payload = JSON.stringify({
@@ -199,7 +288,7 @@ export class CharacterService {
       });
       localStorage.setItem(this.STORAGE_KEY, payload);
     } catch {
-      // ignore write errors (quota, etc.)
+      // Silenciamos errores de escritura (cuota, navegación privada, etc.)
     }
   }
 }

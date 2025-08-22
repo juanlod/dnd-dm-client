@@ -19,7 +19,40 @@
     </div>
 
     <div class="header-actions">
-      <button nz-button (click)="duplicateChar()"><i nz-icon nzType="copy"></i> Duplicar</button>
+      <button nz-button (click)="duplicateChar()">
+        <i nz-icon nzType="copy"></i> Duplicar
+      </button>
+    
+      <button nz-button (click)="saveLocal()">
+        <i nz-icon></i> Guardar
+      </button>
+    
+      <button nz-button nzType="default" (click)="duplicateChar()">
+        Copiar como nuevo (sin PX)
+      </button>
+    
+      <button nz-button nzType="primary" (click)="share()">
+        Compartir con mesa
+      </button>
+    
+      <!-- ===== EXPORTAR / IMPORTAR ===== -->
+      <button nz-button nzType="default" (click)="exportSelected()" [disabled]="!selectedId()">
+        Exportar ficha
+      </button>
+      <button nz-button nzType="default" (click)="exportAll()" [disabled]="!sheets().length">
+        Exportar todo
+      </button>
+      <button nz-button nzType="default" (click)="triggerImport()">
+        Importar fichas
+      </button>
+      <input
+        type="file"
+        accept="application/json"
+        hidden
+        #importInput
+        (change)="onImportFile($event)"
+      />
+    
       <button
         nz-button
         nzDanger
@@ -27,9 +60,8 @@
         (click)="deleteChar(selectedId()!)">
         <i nz-icon nzType="delete"></i> Eliminar
       </button>
-      <button nz-button (click)="saveLocal()"><i nz-icon ></i> Guardar</button>
-      <button nz-button nzType="primary" (click)="share()"><i nz-icon ></i> Compartir</button>
     </div>
+    
   </div>
 
   <div class="line"></div>
@@ -75,7 +107,7 @@
     </div>
   </div>
 
-  <nz-tabset *ngIf="selectedId()">
+  <nz-tabs *ngIf="selectedId()">
     <!-- ============ TAB BÁSICOS ============ -->
     <nz-tab nzTitle="Básicos">
       <!-- Tarjetas de métricas -->
@@ -212,14 +244,8 @@
     <nz-tab nzTitle="Notas">
       <textarea nz-input rows="6" [ngModel]="sheet().notes" (ngModelChange)="update('notes', $event)" placeholder="Notas varias"></textarea>
     </nz-tab>
-  </nz-tabset>
+  </nz-tabs>
 
-  <!-- Acciones (mantengo por coherencia visual, aunque ya están arriba) -->
-  <div class="actions" *ngIf="selectedId()">
-    <button nz-button (click)="saveLocal()">Guardar local</button>
-    <button nz-button nzType="default" (click)="duplicateChar()">Copiar como nuevo (sin PX)</button>
-    <button nz-button nzType="primary" (click)="share()">Compartir con mesa</button>
-  </div>
 
   <!-- Grupo -->
   <div class="party">
