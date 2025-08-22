@@ -31,10 +31,7 @@
         Copiar como nuevo (sin PX)
       </button>
     
-      <button nz-button nzType="primary" (click)="share()">
-        Compartir con mesa
-      </button>
-    
+   
       <!-- ===== EXPORTAR / IMPORTAR ===== -->
       <button nz-button nzType="default" (click)="exportSelected()" [disabled]="!selectedId()">
         Exportar ficha
@@ -52,6 +49,10 @@
         #importInput
         (change)="onImportFile($event)"
       />
+
+      <button nz-button nzType="primary" (click)="share()">
+        Compartir con mesa
+      </button>
     
       <button
         nz-button
