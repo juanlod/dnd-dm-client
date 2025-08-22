@@ -23,7 +23,7 @@ jobs:
           node-version: 20
 
       - name: Install deps
-        run: npm ci
+        run: npm i
 
       - name: Build (prod con base-href del repo)
         run: npm run build -- --configuration production --base-href "/dnd-dm-client/"
